@@ -1,14 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+  <style>
+
+</style>
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">\
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/static.css') }}">
     <meta charset="UTF-8">
     <title>Title</title>
 
+{% extends "bootstrap/base.html" %}
 
+{% block navbar %}
 
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+    <h5 class="my-0 mr-md-auto font-weight-normal">Welcome, {{user}}</h5>
+      <nav class="my-2 my-md-0 mr-md-3">
+        <a class="p-2 text-dark" href="{{url_for('edit',user =user)}}">Edit Profile</a>
+        <a class="p-2 text-dark" href="#">Posts</a>
+        <a class="p-2 text-dark" href="#">Comments</a>
+        <a class="p-2 text-dark" href="#">Trending</a>
+      </nav><h5 class="my-0 mr-md-auto font-weight-normal">S-log</h5>
 
-
+      <a class="btn btn-outline-primary" href="{{url_for('logout')}}">Log out</a>
+    </div>
+{% endblock %}
 
 
 </head>

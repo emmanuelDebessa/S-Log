@@ -18,16 +18,18 @@
 
 <div class="container center_div" align=middle>
 <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-xs-12">
-      <h2> Sign in</h2>
-  <form action="{{url_for('sign')}}" method="post">
+      <h2>Update</h2>
+  <form action="{{url_for('edit',user = user)}}" method="post">
     {{ form.hidden_tag() }}
 
-    <p name="User">
-        {{ form.user.label }}
-        {% if form.user.errors %}
+
+      <p>
+
+            {{ form.email.label }}
+        {% if form.email.errors %}
 
             <ul>
-            {% for error in form.user.errors %}
+            {% for error in form.email.errors %}
             <li    style="color:red;" >
  {{ error }}
             </li>
@@ -35,12 +37,12 @@
 
         </ul
          {% endif %}><br>
-        {{ form.user(size=30,maxlength=100) }}
+        {{ form.email(size=30,maxlength=100) }}
 
 
+</p>
 
-
-    </p>    <p>
+>    <p>
 
               {{ form.password.label }} <br>
             <ul>
@@ -54,15 +56,25 @@
         {{ form.password(size=30) }}
     </p>
 
+ <p>
 
+              {{ form.confirmation.label }} <br>
+            <ul>
+            {% for error in form.confirmation.errors %}
+            <li    style="color:red;" >
+ {{ error }}
+            </li>
+            {% endfor %}
+
+        </ul>
+        {{ form.confirmation(size=30) }}
+    </p>
 
   <p>
         {{ form.submit() }}
     </p>
 
 
-
- <a href='{{url_for("hi")}}' class="btn btn-lg btn-primary">Create Account</a>
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}
