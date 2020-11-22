@@ -39,9 +39,4 @@ def view_posts():
 
     else:
         all_posts = UserPosts.query.order_by(UserPosts.post_date)
-<<<<<<< Updated upstream
         return render_template('ViewPosts.html', all_posts=all_posts)
-
-=======
-        return render_template('ViewPosts.html', all_posts=all_posts)
->>>>>>> Stashed changes
