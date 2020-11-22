@@ -207,6 +207,9 @@ def sign():
 def profile(user):
     return render_template("Homepage.html",user = user)
 
+@app.route('/Profile/<string:user>', methods=['GET', 'POST'])
+    return render_template("user_posts.html", user = user)
+
 @app.route("/logout")
 def logout():
     logout_user()
