@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{username}}'s Comments{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+	<h2>Comment History</h2>
+	<ul id = "commentList">
+		{{% for post in posts %}}
+			<li>[{{comment.datetime}}]    {{comment.text}}    <a href="https://en.wikipedia.org/wiki/United_Nations_Guidelines_for_Consumer_Protection">{{comment.post.title}}</a></li>
+		{{% endfor %}}
+	</ul>
