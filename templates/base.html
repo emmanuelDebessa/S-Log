@@ -1,0 +1,30 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}S'log{% endblock %}
+
+{% block head %}
+{{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% endblock %}
+
+{% block navbar %}
+    <div class="navbar navbar-inverse" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">S'log</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+            </ul>
+            <ul class="nav navbar-nav">
+                <li><a href="/">Your Posts</a></li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% block page_content %}{% endblock %}
+    </div>
+{% endblock %}

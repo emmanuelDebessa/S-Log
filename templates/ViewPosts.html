@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}Misir Wot{% endblock %}
-
+{% block title %}Your Posts{% endblock %}
+{% block head %}
+{{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% endblock %}
 {% block page_content %}
     
     <form class="postForm" action="" method="POST">
-        <textarea name="post"></textarea>
+        <textarea name="post" class="form-control" rows="7" ></textarea>
         <input type="submit" value="Post!" class="btn btn-primary">
     </form>
     
@@ -14,10 +17,9 @@
         <h2>Your Posts</h2>
         {% for currPost in all_posts %}
         <div id="userPost" class="card bg-light mb-3">
-            <div class="card-header">{{ currPost.ingredientname }}</div>
-            <div class="card-text "><p>sdsadasdsa</p></div>
+            <div class="card-header">{{ currPost.post_date }}</div>
+            <div class="card-body"><p>{{ currPost.post }}</p></div>
         </div>
-            <li></li>
         {% endfor %}
            
     </div>     
