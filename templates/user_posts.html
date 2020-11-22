@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{username}}'s posts{% endblock %}
+{% block title %}{{user}}'s posts{% endblock %}
 
 {% block head %}
 {{ super() }}
@@ -11,7 +11,7 @@
 <div class="page-header">
 	<h2>Post History</h2>
 	<ul id = "postList">
-		{{% for post in posts %}}
+		{{% for post in user.posts %}}
 			<li>[{{post.datetime}}]    <a href="https://www.youtube.com/watch?v=0qj67KE5VXI">{{post.title}}</a></li>
 		{{% endfor %}}
 	</ul>
