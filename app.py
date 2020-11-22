@@ -27,7 +27,7 @@ import os
 from wtforms.validators import length,email,email_validator,equal_to
 app = Flask(__name__)
 application = app
-
+basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SECRET_KEY'] = 'hello123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Recipe.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -37,14 +37,26 @@ moment = Moment(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'sign'
+app.config['SQLALCHEMY_BINDS'] = {
+    'users': 'sqlite:///Users',
+    'posts':  'sqlite:///posts'
+}
 
 app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 
 
 # other imports as necessary
 
+class UserPosts(db.Model):
+    __bind_key__ = 'posts'
+    id = db.Column(db.Integer, primary_key=True)
+    post_date = db.Column(db.DateTime, default=datetime.utcnow)
+    post = db.Column(db.String(10,000), nullable=False)
+
+
 
 class Friends(db.Model,UserMixin):
+    __bind_key__ = 'users'
     id = db.Column(db.INTEGER,primary_key=True)
     email = db.Column(db.String(200),nullable = False)
     user = db.Column(db.String(200),nullable = False)
@@ -254,6 +266,20 @@ def confirm_email(token):
         db.session.commit()
         flash('You have confirmed your account. Thanks!', 'success')
     return redirect(url_for('main.home'))
+
+@app.route('/ViewPosts', methods=['GET', 'POST'])
+def view_posts():
+    if request.method == "POST":
+        usr_post = request.form['post']
+        new_post = UserPosts(post=usr_post)
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect(url_for('view_posts'))
+
+    else:
+        all_posts = UserPosts.query.order_by(UserPosts.post_date)
+        return render_template('ViewPosts.html', all_posts=all_posts)
+
 
 
 def send_email(to, subject, template):
