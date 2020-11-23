@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="Recipe" uuid="01038165-e091-4464-af01-67c33f9c4c1c">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\Jonathan\CLionProjects\Project4\S-Log\Recipe.db</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="posts" uuid="767dc5ca-66a8-4e44-8c78-c440777051f5">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\Jonathan\CLionProjects\Project4\S-Log\posts</jdbc-url>
+    </data-source>
+  </component>
+</project>
