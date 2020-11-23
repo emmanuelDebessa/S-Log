@@ -1,0 +1,6 @@
+22//11/2020
+
+User Stoty:
+  - User Authentication, upadating user profiles
+  -Find a way to store posts for each user after signing in***
+  - Put Posts into big pool Database from every user
