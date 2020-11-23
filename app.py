@@ -22,7 +22,7 @@ from flask_login import login_required
 from flask_login import UserMixin
 from itsdangerous import URLSafeTimedSerializer
 from flask_login import logout_user
-from flask_mail import Message
+from flask_mail import Message,Mail
 import os
 from wtforms.validators import length,email,email_validator,equal_to
 app = Flask(__name__)
@@ -31,12 +31,26 @@ application = app
 app.config['SECRET_KEY'] = 'hello123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Recipe.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+
+    # gmail authentication
+app.config['MAIL_USERNAME'] = "jonlai0018"
+app.config['MAIL_PASSWORD'] =  "Rh579782"
+
+    # mail accounts
+app.config['MAIL_DEFAULT_SENDER'] = "jonlai0018@gmail.com"
+
+
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'sign'
+mail = Mail(app)
 
 app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
@@ -138,7 +152,7 @@ def generate_confirmation_token(email):
     return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
 
 
-def confirm_token(token, expiration=3600):
+def confirm_token(token, expiration=10000000000):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     try:
         email = serializer.loads(
@@ -156,6 +170,7 @@ def confirm_token(token, expiration=3600):
 @app.route('/',methods=['GET','POST'])
 
 def hi():
+   
     form = InputLabels()
 
     if(form.validate_on_submit()):
@@ -164,16 +179,21 @@ def hi():
         password = request.form['password']
         user1 = Friends(user=user, email=email,password=password,confirmed=False)
         user1.set_password(password)
+    
+        token = generate_confirmation_token(email)
+      
+        confirm_url = url_for('confirm_email', token=token, _external=True)
+
+
+        print(token)
+        html = render_template('activate.html', confirm_url=confirm_url)
+        subject = "Please confirm your email"
+        send_email(email, subject, html)
+        flash('A confirmation email has been sent via email.', 'success')
         db.session.add(user1)
         db.session.commit()
-     #   token = generate_confirmation_token(email)
-      #  confirm_url = url_for(email, token=token, _external=True)
-      #  print(confirm_url)
-       # html = render_template('email.html', confirm_url=confirm_url)
-       # subject = "Please confirm your email"
-       #flas send_email(user.email, subject, html)
 
-        return render_template("Flask_Form.html",Username = user)
+        return redirect(url_for("sign"))
 
 
 
@@ -195,6 +215,11 @@ def sign():
     if (form.validate_on_submit()):
         result = request.form['user']
         user = Friends.query.filter_by(user=result).first()
+        if user.confirmed == False:
+
+            flash("Confirm Email")
+            return render_template('Login.html', form=form)
+
         if user is None or not user.check_password(request.form['password']):
 
             flash("Invalid Username or Password")
@@ -247,7 +272,7 @@ def edit(user):
 
 
 @app.route('/confirm/<token>')
-@login_required
+
 def confirm_email(token):
     try:
         email = confirm_token(token)
@@ -258,11 +283,10 @@ def confirm_email(token):
         flash('Account already confirmed. Please login.', 'success')
     else:
         user.confirmed = True
-        user.confirmed_on = datetime.datetime.now()
         db.session.add(user)
         db.session.commit()
         flash('You have confirmed your account. Thanks!', 'success')
-    return redirect(url_for('main.home'))
+    return redirect(url_for("sign"))
 
 
 def send_email(to, subject, template):
