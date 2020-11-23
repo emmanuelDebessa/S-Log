@@ -7,12 +7,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 {% endblock %}
 {% block page_content %}
-
+    
     <form class="postForm" action="" method="POST">
         <textarea name="post" class="form-control" rows="7" ></textarea>
         <input type="submit" value="Post!" class="btn btn-primary">
     </form>
-
+    
     <div id="postList">
         <h2>Your Posts</h2>
         {% for currPost in all_posts %}
@@ -21,6 +21,6 @@
             <div class="card-body"><p>{{ currPost.post }}</p></div>
         </div>
         {% endfor %}
-
-    </div>
+           
+    </div>     
 {% endblock %}

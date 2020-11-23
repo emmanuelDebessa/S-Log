@@ -27,7 +27,7 @@ import os
 from wtforms.validators import length,email,email_validator,equal_to
 app = Flask(__name__)
 application = app
-basedir = os.path.abspath(os.path.dirname(__file__))
+
 app.config['SECRET_KEY'] = 'hello123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Recipe.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -37,23 +37,19 @@ moment = Moment(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'sign'
+
+app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'sqlite:///Users',
     'posts':  'sqlite:///posts'
 }
 
-app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
-
-
 # other imports as necessary
-
 class UserPosts(db.Model):
     __bind_key__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
     post_date = db.Column(db.DateTime, default=datetime.utcnow)
     post = db.Column(db.String(10,000), nullable=False)
-
-
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
@@ -64,6 +60,7 @@ class Friends(db.Model,UserMixin):
     password_hash = db.Column(db.String(200),nullable = False)
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
+
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
     def is_authenticated(self):
@@ -267,6 +264,17 @@ def confirm_email(token):
         flash('You have confirmed your account. Thanks!', 'success')
     return redirect(url_for('main.home'))
 
+
+def send_email(to, subject, template):
+    msg = Message(
+        subject,
+        recipients=[to],
+        html=template,
+        sender=app.config['MAIL_DEFAULT_SENDER']
+    )
+    mail.send(msg)
+
+
 @app.route('/ViewPosts', methods=['GET', 'POST'])
 def view_posts():
     if request.method == "POST":
@@ -279,17 +287,6 @@ def view_posts():
     else:
         all_posts = UserPosts.query.order_by(UserPosts.post_date)
         return render_template('ViewPosts.html', all_posts=all_posts)
-
-
-
-def send_email(to, subject, template):
-    msg = Message(
-        subject,
-        recipients=[to],
-        html=template,
-        sender=app.config['MAIL_DEFAULT_SENDER']
-    )
-    mail.send(msg)
 
 if __name__ == '__main__':
     app.run()
