@@ -3,7 +3,7 @@ from flask import Flask, render_template, session, redirect, url_for, request
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField,validators, BooleanField,PasswordField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -19,7 +19,9 @@ from itsdangerous import URLSafeTimedSerializer
 from flask_login import logout_user
 from flask_mail import Message
 import os
-from wtforms.validators import length,email,email_validator,equal_to
+from flask_wtf import FlaskForm
+from wtforms import ValidationError
+from wtforms.validators import length,email,email_validator,equal_to,length
 app = Flask(__name__)
 application = app
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -42,11 +44,6 @@ app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 
 # other imports as necessary
 
-class UserPosts(db.Model):
-    __bind_key__ = 'posts'
-    id = db.Column(db.Integer, primary_key=True)
-    post_date = db.Column(db.DateTime, default=datetime.utcnow)
-    post = db.Column(db.String(10,000), nullable=False)
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] =\
