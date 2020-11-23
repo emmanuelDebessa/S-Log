@@ -1,6 +1,9 @@
 22//11/2020
 
-User Stoty:
-  - User Authentication, upadating user profiles
+User Story:
+  - User Authentication, upadating user profiles ( email verification for email) , delete accoount, 
   -Find a way to store posts for each user after signing in***
   - Put Posts into big pool Database from every user
+  - Delete a post and comment
+  - Include upvoting for every post and evey comment
+  - Supoort image upload, file upload??(low priiority)
