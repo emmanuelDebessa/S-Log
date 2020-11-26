@@ -21,8 +21,13 @@
   <component name="ChangeListManager">
     <list default="true" id="15e2bf08-5485-4346-9348-dd07d1fc1440" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Users" beforeDir="false" afterPath="$PROJECT_DIR$/Users" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/Edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/Email_Update.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Email_Update.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ViewPosts.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ViewPosts.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/account.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,8 +37,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -84,8 +89,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1606077336488</updated>
-      <workItem from="1606077337869" duration="8248000" />
-      <workItem from="1606109297818" duration="301000" />
+      <workItem from="1606077337869" duration="7959000" />
+      <workItem from="1606164407848" duration="822000" />
+      <workItem from="1606167709749" duration="4444000" />
+      <workItem from="1606191562965" duration="7431000" />
+      <workItem from="1606267791479" duration="5761000" />
+      <workItem from="1606323022923" duration="11175000" />
     </task>
     <servers />
   </component>
@@ -103,5 +112,15 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1052" y="503" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1606164386348">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="1052" y="503" key="#com.intellij.fileTypes.FileTypeChooser/0.0.2560.1400@0.0.2560.1400" timestamp="1606164386348" />
+    <state x="943" y="315" width="672" height="678" key="search.everywhere.popup" timestamp="1606326771272">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="943" y="315" width="672" height="678" key="search.everywhere.popup/0.0.2560.1400@0.0.2560.1400" timestamp="1606326771272" />
   </component>
 </project>

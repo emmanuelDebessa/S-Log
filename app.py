@@ -1,9 +1,14 @@
-import os
-from flask import Flask, render_template, session, redirect, url_for, request
+from flask import Flask,request,redirect,flash
+from wtforms import Form, BooleanField, StringField, PasswordField, validators
+from flask import render_template
+##from forms import InputLabels, Signin
+from flask_wtf.csrf import CSRFProtect
+from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template,request,redirect,url_for
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField,validators, BooleanField,PasswordField
+from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -17,41 +22,52 @@ from flask_login import login_required
 from flask_login import UserMixin
 from itsdangerous import URLSafeTimedSerializer
 from flask_login import logout_user
-from flask_mail import Message
+from flask_mail import Message,Mail
 import os
-from flask_wtf import FlaskForm
-from wtforms import ValidationError
-from wtforms.validators import length,email,email_validator,equal_to,length
+from wtforms.validators import length,email,email_validator,equal_to
 app = Flask(__name__)
 application = app
-basedir = os.path.abspath(os.path.dirname(__file__))
+
 app.config['SECRET_KEY'] = 'hello123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Recipe.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+
+    # gmail authentication
+app.config['MAIL_USERNAME'] = "jonlai0018"
+app.config['MAIL_PASSWORD'] =  "Rh579782"
+
+    # mail accounts
+app.config['MAIL_DEFAULT_SENDER'] = "jonlai0018@gmail.com"
+
+
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'sign'
+mail = Mail(app)
+
+app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'sqlite:///Users',
     'posts':  'sqlite:///posts'
 }
 
-app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
-
-
 # other imports as necessary
-
-
-
-app.config['SQLALCHEMY_DATABASE_URI'] =\
-    'sqlite:///' + os.path.join(basedir, 'data.sqlite')
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+class UserPosts(db.Model):
+    __bind_key__ = 'posts'
+    id = db.Column(db.Integer, primary_key=True)
+    post_date = db.Column(db.DateTime, default=datetime.utcnow)
+    post = db.Column(db.String(10,000), nullable=False)
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
+    image_file = db.Column(db.String(20), nullable=False, default='default_twitter.png')
     id = db.Column(db.INTEGER,primary_key=True)
     email = db.Column(db.String(200),nullable = False)
     user = db.Column(db.String(200),nullable = False)
@@ -59,6 +75,7 @@ class Friends(db.Model,UserMixin):
     password_hash = db.Column(db.String(200),nullable = False)
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
+
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
     def is_authenticated(self):
@@ -66,11 +83,6 @@ class Friends(db.Model,UserMixin):
         return self.authenticated
 
 
-class UserPosts(db.Model):
-    __tablename__ = 'userPosts'
-    id = db.Column(db.Integer, primary_key=True)
-    post_date = db.Column(db.DateTime, default=datetime.utcnow)
-    post = db.Column(db.String(10,000), nullable=False)
 
     def __repr__(self):
         return '<Email %r>' % self.email
@@ -100,6 +112,7 @@ class InputLabels(FlaskForm):
     submit = SubmitField("Sign up")
 
     accept_tos = BooleanField("By Clicking here you agree to our TOS", [validators.DataRequired("Must click so we do not get sued")])
+    remember_me = BooleanField('Keep me logged in')
 
     def validate_user(self,user):
         email = Friends.query.filter_by(user=user.data).first()
@@ -126,13 +139,25 @@ class Change(FlaskForm):
                                               validators.DataRequired("Required")])
 
     confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
-    submit = SubmitField("Log in")
+    submit = SubmitField("Submit")
     def validate_email(self,email):
         email= Friends.query.filter_by(email=email.data).first()
         if email != None:
              raise ValidationError('That email is taken. Please choose another.')
 
+class Change_pass(FlaskForm):
+    password = PasswordField('New Password', [validators.EqualTo('confirmation', message='Passwords must match'),
+                                              validators.DataRequired("Required")])
 
+    confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
+    submit = SubmitField("Submit")
+
+
+class Reset(FlaskForm):
+    email = StringField("Email", [validators.length(min=5, message="Length must be 5+"),
+                                  validators.email(message="Must be email")])
+
+    submit = SubmitField("Submit")
 
 
 
@@ -141,7 +166,7 @@ def generate_confirmation_token(email):
     return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
 
 
-def confirm_token(token, expiration=3600):
+def confirm_token(token, expiration=10000000000):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     try:
         email = serializer.loads(
@@ -159,6 +184,7 @@ def confirm_token(token, expiration=3600):
 @app.route('/',methods=['GET','POST'])
 
 def hi():
+   
     form = InputLabels()
 
     if(form.validate_on_submit()):
@@ -167,16 +193,21 @@ def hi():
         password = request.form['password']
         user1 = Friends(user=user, email=email,password=password,confirmed=False)
         user1.set_password(password)
+    
+        token = generate_confirmation_token(email)
+      
+        confirm_url = url_for('confirm_email', token=token, _external=True)
+
+
+        print(token)
+        html = render_template('activate.html', confirm_url=confirm_url)
+        subject = "Please confirm your email"
+        send_email(email, subject, html)
+        flash('A confirmation email has been sent via email.', 'success')
         db.session.add(user1)
         db.session.commit()
-     #   token = generate_confirmation_token(email)
-      #  confirm_url = url_for(email, token=token, _external=True)
-      #  print(confirm_url)
-       # html = render_template('email.html', confirm_url=confirm_url)
-       # subject = "Please confirm your email"
-       #flas send_email(user.email, subject, html)
 
-        return render_template("Flask_Form.html",Username = user)
+        return redirect(url_for("sign"))
 
 
 
@@ -197,12 +228,19 @@ def sign():
 
     if (form.validate_on_submit()):
         result = request.form['user']
+
         user = Friends.query.filter_by(user=result).first()
+
+
+
         if user is None or not user.check_password(request.form['password']):
+            print("hello")
 
             flash("Invalid Username or Password")
             return render_template('Login.html', form=form)
-
+        if user.confirmed is False:
+            flash("Confirm Email")
+            return render_template('Login.html', form=form)
 #        login_user(user, remember=True)
         user.authenticated = True
         login_user(user,remember=True)
@@ -225,32 +263,150 @@ def logout():
     return redirect(url_for('hi'))
 
 
-@app.route("/Settings/<string:user>", methods=['GET', 'POST'])
+@app.route("/Password/<string:user>", methods=['GET', 'POST'])
+@login_required
 def edit(user):
-
     form = Change()
 
-    update1 = db.session.query(Friends).filter_by(user = user).first()
-
-    if (form.validate_on_submit() and update1 is not None):
+    user_to_update = Friends.query.filter_by(user = user).first_or_404()
 
 
 
-        update1.email =request.form['email']
 
-        update1.password = request.form['password']
-        db.session.merge(update1)
-        db.session.commit()
 
-        return redirect(url_for('sign'))
+    if(form.validate_on_submit()):
+
+        if(request.form['email'] != user_to_update.email):
+            flash("Wrong Email")
+        else:
+
+
+            user_to_update.password = request.form['password']
+            user_to_update.set_password(request.form['password'])
+            db.session.add(user_to_update)
+            db.session.commit()
+
+            flash("Password Change Succesfully")
+
+
     return render_template('Edit.html', form=form ,user =user)
+
+
+
+@app.route("/Email/<string:user>", methods=['GET', 'POST'])
+@login_required
+def Email_change(user):
+    form = Change()
+
+    user_to_update = Friends.query.filter_by(user = user).first_or_404()
+
+
+
+
+    if(form.validate_on_submit()):
+
+
+
+            user_to_update.email = request.form['email']
+            user_to_update.confirmed= False
+            token = generate_confirmation_token(request.form['email'])
+            confirm_url = url_for('confirm_email', token=token, _external=True)
+
+
+            html = render_template('activate.html', confirm_url=confirm_url)
+            subject = "Please confirm your email"
+            send_email(request.form['email'], subject, html)
+            flash('A confirmation email has been sent via email. You need to confirm your email before being able to login', 'success')
+            logout()
+
+
+
+            db.session.add(user_to_update)
+            db.session.commit()
+
+
+
+
+    return render_template('Email_Update.html', form=form ,user =user)
+
+
+
+
+
+@app.route("/Reset/", methods=['GET', 'POST'])
+
+def Recover():
+    form = Reset()
+
+
+
+
+
+
+    if(form.validate_on_submit() ):
+        email= request.form['email']
+        user_to_update = Friends.query.filter_by(email=email).first()
+        if(user_to_update is not None):
+
+            token = generate_confirmation_token(email)
+            confirm_url = url_for('confirm_pass', token=token, _external=True)
+            html = render_template('activate.html', confirm_url=confirm_url)
+            subject = "Password Reset"
+            send_email(request.form['email'], subject, html)
+            flash("Done")
+        else:
+            flash("No account associated with this email")
+    return render_template('Reset_password.html', form=form)
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/confirm_pass/<token>' ,methods=['GET', 'POST'])
+
+def confirm_pass(token):
+    form = Change_pass()
+
+    try:
+        email = confirm_token(token)
+    except:
+        flash('The confirmation link is invalid or has expired.', 'danger')
+    user = Friends.query.filter_by(email=email).first_or_404()
+    if (form.validate_on_submit()):
+        password = request.form['password']
+        user.password=password
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        flash("done")
+    else:
+        flash("broken")
+
+
+
+    return render_template('Recover_pass.html',form = form,token= token)
+
+
+
+
+
+
+
 
 
 
 
 
 @app.route('/confirm/<token>')
-@login_required
+
 def confirm_email(token):
     try:
         email = confirm_token(token)
@@ -261,11 +417,21 @@ def confirm_email(token):
         flash('Account already confirmed. Please login.', 'success')
     else:
         user.confirmed = True
-        user.confirmed_on = datetime.datetime.now()
         db.session.add(user)
         db.session.commit()
         flash('You have confirmed your account. Thanks!', 'success')
-    return redirect(url_for('main.home'))
+    return redirect(url_for("sign"))
+
+
+def send_email(to, subject, template):
+    msg = Message(
+        subject,
+        recipients=[to],
+        html=template,
+        sender=app.config['MAIL_DEFAULT_SENDER']
+    )
+    mail.send(msg)
+
 
 @app.route('/ViewPosts', methods=['GET', 'POST'])
 def view_posts():
@@ -278,18 +444,16 @@ def view_posts():
 
     else:
         all_posts = UserPosts.query.order_by(UserPosts.post_date)
+
         return render_template('ViewPosts.html', all_posts=all_posts)
 
 
+@app.route('/Account')
+@login_required
+def account():
+    image_file = url_for('static', filename='profile_images/' + current_user.image_file)
+    return render_template('account.html',title = "Account",image = image_file)
 
-def send_email(to, subject, template):
-    msg = Message(
-        subject,
-        recipients=[to],
-        html=template,
-        sender=app.config['MAIL_DEFAULT_SENDER']
-    )
-    mail.send(msg)
 
 if __name__ == '__main__':
     app.run()

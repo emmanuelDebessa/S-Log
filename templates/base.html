@@ -8,19 +8,36 @@
 {% endblock %}
 
 {% block navbar %}
-    <div class="navbar navbar-inverse" role="navigation">
-        <div class="container">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">S'log</a>
-            </div>
-            <ul class="nav navbar-nav">
-                <li><a href="#">Home</a></li>
-            </ul>
-            <ul class="nav navbar-nav">
-                <li><a href="#">Your Posts</a></li>
-            </ul>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">Welcome {{current_user.user}}</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="{{url_for('account')}}">Profile <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"  href="{{url_for('view_posts')}}">Posts</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Comments</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Settings
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+          <a class="dropdown-item" href="{{url_for('edit',user =current_user.user)}}">Change Password</a>
+          <a class="dropdown-item"  href="{{url_for('Email_change',user =current_user.user)}}">Change Email</a>
+          <a class="dropdown-item" href="#">Change profile</a>
         </div>
-    </div>
+      </li>
+    </ul>
+  </div>
+           <a class="btn btn-outline-primary" href="{{url_for('logout')}}">Log out</a>
+</nav>
 {% endblock %}
 
 {% block content %}
