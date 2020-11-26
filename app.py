@@ -67,6 +67,7 @@ class UserPosts(db.Model):
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
+    image_file = db.Column(db.String(20), nullable=False, default='default_twitter.png')
     id = db.Column(db.INTEGER,primary_key=True)
     email = db.Column(db.String(200),nullable = False)
     user = db.Column(db.String(200),nullable = False)
@@ -111,6 +112,7 @@ class InputLabels(FlaskForm):
     submit = SubmitField("Sign up")
 
     accept_tos = BooleanField("By Clicking here you agree to our TOS", [validators.DataRequired("Must click so we do not get sued")])
+    remember_me = BooleanField('Keep me logged in')
 
     def validate_user(self,user):
         email = Friends.query.filter_by(user=user.data).first()
@@ -137,13 +139,25 @@ class Change(FlaskForm):
                                               validators.DataRequired("Required")])
 
     confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
-    submit = SubmitField("Log in")
+    submit = SubmitField("Submit")
     def validate_email(self,email):
         email= Friends.query.filter_by(email=email.data).first()
         if email != None:
              raise ValidationError('That email is taken. Please choose another.')
 
+class Change_pass(FlaskForm):
+    password = PasswordField('New Password', [validators.EqualTo('confirmation', message='Passwords must match'),
+                                              validators.DataRequired("Required")])
 
+    confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
+    submit = SubmitField("Submit")
+
+
+class Reset(FlaskForm):
+    email = StringField("Email", [validators.length(min=5, message="Length must be 5+"),
+                                  validators.email(message="Must be email")])
+
+    submit = SubmitField("Submit")
 
 
 
@@ -214,17 +228,19 @@ def sign():
 
     if (form.validate_on_submit()):
         result = request.form['user']
-        user = Friends.query.filter_by(user=result).first()
-        if user.confirmed == False:
 
-            flash("Confirm Email")
-            return render_template('Login.html', form=form)
+        user = Friends.query.filter_by(user=result).first()
+
+
 
         if user is None or not user.check_password(request.form['password']):
+            print("hello")
 
             flash("Invalid Username or Password")
             return render_template('Login.html', form=form)
-
+        if user.confirmed is False:
+            flash("Confirm Email")
+            return render_template('Login.html', form=form)
 #        login_user(user, remember=True)
         user.authenticated = True
         login_user(user,remember=True)
@@ -247,25 +263,143 @@ def logout():
     return redirect(url_for('hi'))
 
 
-@app.route("/Settings/<string:user>", methods=['GET', 'POST'])
+@app.route("/Password/<string:user>", methods=['GET', 'POST'])
+@login_required
 def edit(user):
-
     form = Change()
 
-    update1 = db.session.query(Friends).filter_by(user = user).first()
-
-    if (form.validate_on_submit() and update1 is not None):
+    user_to_update = Friends.query.filter_by(user = user).first_or_404()
 
 
 
-        update1.email =request.form['email']
 
-        update1.password = request.form['password']
-        db.session.merge(update1)
-        db.session.commit()
 
-        return redirect(url_for('sign'))
+    if(form.validate_on_submit()):
+
+        if(request.form['email'] != user_to_update.email):
+            flash("Wrong Email")
+        else:
+
+
+            user_to_update.password = request.form['password']
+            user_to_update.set_password(request.form['password'])
+            db.session.add(user_to_update)
+            db.session.commit()
+
+            flash("Password Change Succesfully")
+
+
     return render_template('Edit.html', form=form ,user =user)
+
+
+
+@app.route("/Email/<string:user>", methods=['GET', 'POST'])
+@login_required
+def Email_change(user):
+    form = Change()
+
+    user_to_update = Friends.query.filter_by(user = user).first_or_404()
+
+
+
+
+    if(form.validate_on_submit()):
+
+
+
+            user_to_update.email = request.form['email']
+            user_to_update.confirmed= False
+            token = generate_confirmation_token(request.form['email'])
+            confirm_url = url_for('confirm_email', token=token, _external=True)
+
+
+            html = render_template('activate.html', confirm_url=confirm_url)
+            subject = "Please confirm your email"
+            send_email(request.form['email'], subject, html)
+            flash('A confirmation email has been sent via email. You need to confirm your email before being able to login', 'success')
+            logout()
+
+
+
+            db.session.add(user_to_update)
+            db.session.commit()
+
+
+
+
+    return render_template('Email_Update.html', form=form ,user =user)
+
+
+
+
+
+@app.route("/Reset/", methods=['GET', 'POST'])
+
+def Recover():
+    form = Reset()
+
+
+
+
+
+
+    if(form.validate_on_submit() ):
+        email= request.form['email']
+        user_to_update = Friends.query.filter_by(email=email).first()
+        if(user_to_update is not None):
+
+            token = generate_confirmation_token(email)
+            confirm_url = url_for('confirm_pass', token=token, _external=True)
+            html = render_template('activate.html', confirm_url=confirm_url)
+            subject = "Password Reset"
+            send_email(request.form['email'], subject, html)
+            flash("Done")
+        else:
+            flash("No account associated with this email")
+    return render_template('Reset_password.html', form=form)
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/confirm_pass/<token>' ,methods=['GET', 'POST'])
+
+def confirm_pass(token):
+    form = Change_pass()
+
+    try:
+        email = confirm_token(token)
+    except:
+        flash('The confirmation link is invalid or has expired.', 'danger')
+    user = Friends.query.filter_by(email=email).first_or_404()
+    if (form.validate_on_submit()):
+        password = request.form['password']
+        user.password=password
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        flash("done")
+    else:
+        flash("broken")
+
+
+
+    return render_template('Recover_pass.html',form = form,token= token)
+
+
+
+
+
+
+
 
 
 
@@ -310,7 +444,16 @@ def view_posts():
 
     else:
         all_posts = UserPosts.query.order_by(UserPosts.post_date)
+
         return render_template('ViewPosts.html', all_posts=all_posts)
+
+
+@app.route('/Account')
+@login_required
+def account():
+    image_file = url_for('static', filename='profile_images/' + current_user.image_file)
+    return render_template('account.html',title = "Account",image = image_file)
+
 
 if __name__ == '__main__':
     app.run()
