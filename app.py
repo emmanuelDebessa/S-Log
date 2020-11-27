@@ -76,6 +76,8 @@ class Friends(db.Model,UserMixin):
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
 
+
+
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
     def is_authenticated(self):
