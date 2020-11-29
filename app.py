@@ -1,6 +1,9 @@
 from flask import Flask,request,redirect,flash
-from wtforms import Form, BooleanField, StringField, PasswordField, validators
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms import Form, BooleanField, StringField, PasswordField, validators,FileField
 from flask import render_template
+import secrets
+from PIL import Image
 ##from forms import InputLabels, Signin
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
@@ -23,7 +26,6 @@ from flask_login import UserMixin
 from itsdangerous import URLSafeTimedSerializer
 from flask_login import logout_user
 from flask_mail import Message,Mail
-# from flask.ext.perm import Perm
 import os
 from wtforms.validators import length,email,email_validator,equal_to
 app = Flask(__name__)
@@ -59,6 +61,25 @@ app.config['SQLALCHEMY_BINDS'] = {
     'users': 'sqlite:///Users',
     'posts':  'sqlite:///posts'
 }
+
+class UpdateAccountForm(FlaskForm):
+    user = StringField('Username',
+                           validators=[DataRequired()])
+
+    picture = FileField('Update Profile Picture', [FileAllowed(['jpg', 'png'])])
+    submit = SubmitField('Update')
+
+    def validate_username(self, username):
+        if username.data != current_user.username:
+            user = User.query.filter_by(username=username.data).first()
+            if user:
+                raise ValidationError('That username is taken. Please choose a different one.')
+
+    def validate_email(self, email):
+        if email.data != current_user.email:
+            user = User.query.filter_by(email=email.data).first()
+            if user:
+                raise ValidationError('That email is taken. Please choose a different one.')
 
 # other imports as necessary
 class UserPosts(db.Model):
@@ -165,6 +186,20 @@ class Reset(FlaskForm):
                                   validators.email(message="Must be email")])
 
     submit = SubmitField("Submit")
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    return picture_fn
+
 
 
 
@@ -486,6 +521,24 @@ def view_posts():
 def account():
     image_file = url_for('static', filename='profile_images/' + current_user.image_file)
     return render_template('account.html',title = "Account",image = image_file)
+
+
+@app.route('/ChangeProfile/', methods=['GET', 'POST'])
+@login_required
+def Change_Profile():
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
+
+        picture_file = save_picture(form.picture.data)
+        current_user.image_file = picture_file
+
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+
+        return render_template('Change_profile.html',form = form)
+    return render_template('Change_profile.html',form = form)
 
 
 if __name__ == '__main__':
