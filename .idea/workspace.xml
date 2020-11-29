@@ -22,12 +22,8 @@
     <list default="true" id="15e2bf08-5485-4346-9348-dd07d1fc1440" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Users" beforeDir="false" afterPath="$PROJECT_DIR$/Users" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/Edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Edit.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/Email_Update.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Email_Update.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/ViewPosts.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ViewPosts.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,6 +91,9 @@
       <workItem from="1606191562965" duration="7431000" />
       <workItem from="1606267791479" duration="5761000" />
       <workItem from="1606323022923" duration="11175000" />
+      <workItem from="1606432929311" duration="924000" />
+      <workItem from="1606441764602" duration="365000" />
+      <workItem from="1606446840418" duration="986000" />
     </task>
     <servers />
   </component>

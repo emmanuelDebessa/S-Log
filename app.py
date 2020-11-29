@@ -81,6 +81,8 @@ class Friends(db.Model,UserMixin):
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
     posts = db.relationship('UserPosts', backref='author', lazy='dynamic')
 
+
+
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
     def is_authenticated(self):
