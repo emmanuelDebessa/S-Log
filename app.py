@@ -23,13 +23,14 @@ from flask_login import UserMixin
 from itsdangerous import URLSafeTimedSerializer
 from flask_login import logout_user
 from flask_mail import Message,Mail
+# from flask.ext.perm import Perm
 import os
 from wtforms.validators import length,email,email_validator,equal_to
 app = Flask(__name__)
 application = app
 
 app.config['SECRET_KEY'] = 'hello123'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Recipe.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///relationships.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 465
@@ -51,6 +52,7 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'sign'
 mail = Mail(app)
+# perm = Perm(app)
 
 app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
@@ -63,7 +65,9 @@ class UserPosts(db.Model):
     __bind_key__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
     post_date = db.Column(db.DateTime, default=datetime.utcnow)
-    post = db.Column(db.String(10,000), nullable=False)
+    post_content = db.Column(db.String(10,000), nullable=False)
+    post_title = db.Column(db.String(200), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
@@ -75,6 +79,7 @@ class Friends(db.Model,UserMixin):
     password_hash = db.Column(db.String(200),nullable = False)
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
+    posts = db.relationship('UserPosts', backref='author', lazy='dynamic')
 
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
@@ -432,12 +437,38 @@ def send_email(to, subject, template):
     )
     mail.send(msg)
 
+def get_post(id, check_author=True):
+    post = UserPosts.query.filter_by(id=id).first()
+    return post
+
+# @perm.current_user_loader(lambda: current_user)
+@app.route('/updatePost/<int:id>/', methods=['GET','POST'])
+@login_required
+def update(id):
+    updated_post = get_post(id)
+    if request.method == "POST":
+        updated_post.post_content = request.form['post_content']
+        updated_post.post_title = request.form['post_title']
+        db.session.commit()
+        flash('Post Updated!')
+        return redirect(url_for('view_posts'))
+    else:
+        return render_template('ViewPosts.html')
+
+@app.route('/deletePost/<int:id>/', methods=['GET','POST'])
+@login_required
+def delete(id):
+    deleted = get_post(id)
+    db.session.delete(deleted)
+    db.session.commit()
+    return redirect(url_for('view_posts'))
 
 @app.route('/ViewPosts', methods=['GET', 'POST'])
 def view_posts():
     if request.method == "POST":
-        usr_post = request.form['post']
-        new_post = UserPosts(post=usr_post)
+        usr_post = request.form['post_content']
+        usr_title = request.form['post_title']
+        new_post = UserPosts(post_content=usr_post,post_title=usr_title, author=current_user)
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('view_posts'))

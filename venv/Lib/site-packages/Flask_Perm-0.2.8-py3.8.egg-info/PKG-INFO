@@ -1,0 +1,21 @@
+Metadata-Version: 1.1
+Name: Flask-Perm
+Version: 0.2.8
+Summary: Flask Permission Management Extension
+Home-page: https://github.com/soasme/flask-perm
+Author: Ju Lin
+Author-email: soasme@gmail.com
+License: MIT
+Description: 
+        A permission flask extension inspired by Django.
+        
+Platform: any
+Classifier: Framework :: Flask
+Classifier: Natural Language :: English
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

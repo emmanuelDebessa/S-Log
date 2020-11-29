@@ -22,3 +22,16 @@
   padding-right:60px;
 }
 
+#postAuthor {
+    color: #7796f2;
+}
+
+#postDate {
+    float: right;
+}
+
+#postName {
+    font-style: italic;
+    font-weight: bold;
+}
+
