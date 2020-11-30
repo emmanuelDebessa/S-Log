@@ -89,6 +89,16 @@ class UserPosts(db.Model):
     post_content = db.Column(db.String(10,000), nullable=False)
     post_title = db.Column(db.String(200), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    comments = db.relationship('Comment', backref='post', lazy='dynamic')
+
+
+class Comment(db.Model):
+    __bind_key__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('userPosts.id'))
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
@@ -101,6 +111,7 @@ class Friends(db.Model,UserMixin):
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
     posts = db.relationship('UserPosts', backref='author', lazy='dynamic')
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
 
 
 
@@ -499,6 +510,20 @@ def delete(id):
     db.session.delete(deleted)
     db.session.commit()
     return redirect(url_for('view_posts'))
+
+@app.route('/makeComment/<int:id>/', methods=['GET','POST'])
+@login_required
+def make_comment(id):
+    post = get_post(id)
+    if request.method == "POST":
+        usr_cmmt = request.form['body']
+        new_cmmt = Comment(body=usr_cmmt, post=post, author=current_user)
+        db.session.add(new_cmmt)
+        db.session.commit()
+        flash('Comment made!')
+        return redirect(url_for('view_posts'))
+    else:
+        return render_template('ViewPosts.html')
 
 @app.route('/ViewPosts', methods=['GET', 'POST'])
 def view_posts():
