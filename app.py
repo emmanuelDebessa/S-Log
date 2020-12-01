@@ -146,11 +146,20 @@ class Change(FlaskForm):
              raise ValidationError('That email is taken. Please choose another.')
 
 class Change_pass(FlaskForm):
+    old_pass = PasswordField('Old Password', [validators.DataRequired("Required")])
+
     password = PasswordField('New Password', [validators.EqualTo('confirmation', message='Passwords must match'),
                                               validators.DataRequired("Required")])
 
     confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
     submit = SubmitField("Submit")
+
+class Delete_account(FlaskForm):
+    password = PasswordField('Current Passwrd', [validators.EqualTo('confirmation', message='Passwords must match'),
+                                              validators.DataRequired("Required")])
+
+    confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
+    submit = SubmitField("Delete account forever")
 
 
 class Reset(FlaskForm):
@@ -159,6 +168,24 @@ class Reset(FlaskForm):
 
     submit = SubmitField("Submit")
 
+<<<<<<< Updated upstream
+=======
+def save_picture(form_picture):
+
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static\\profile_images', picture_fn)
+
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    return picture_fn
+
+
+>>>>>>> Stashed changes
 
 
 def generate_confirmation_token(email):
@@ -200,7 +227,7 @@ def hi():
 
 
         print(token)
-        html = render_template('activate.html', confirm_url=confirm_url)
+        html = render_template('activate.html', confirm_url=confirm_url,user = user)
         subject = "Please confirm your email"
         send_email(email, subject, html)
         flash('A confirmation email has been sent via email.', 'success')
@@ -266,7 +293,7 @@ def logout():
 @app.route("/Password/<string:user>", methods=['GET', 'POST'])
 @login_required
 def edit(user):
-    form = Change()
+    form = Change_pass()
 
     user_to_update = Friends.query.filter_by(user = user).first_or_404()
 
@@ -276,9 +303,12 @@ def edit(user):
 
     if(form.validate_on_submit()):
 
-        if(request.form['email'] != user_to_update.email):
-            flash("Wrong Email")
+
+        if not user_to_update.check_password(request.form['old_pass']):
+            flash("Wrong password")
+
         else:
+
 
 
             user_to_update.password = request.form['password']
@@ -313,11 +343,10 @@ def Email_change(user):
             confirm_url = url_for('confirm_email', token=token, _external=True)
 
 
-            html = render_template('activate.html', confirm_url=confirm_url)
+            html = render_template('activate.html', confirm_url=confirm_url,user = user)
             subject = "Please confirm your email"
             send_email(request.form['email'], subject, html)
             flash('A confirmation email has been sent via email. You need to confirm your email before being able to login', 'success')
-            logout()
 
 
 
@@ -350,7 +379,7 @@ def Recover():
 
             token = generate_confirmation_token(email)
             confirm_url = url_for('confirm_pass', token=token, _external=True)
-            html = render_template('activate.html', confirm_url=confirm_url)
+            html = render_template('activate.html', confirm_url=confirm_url,user = user_to_update.user)
             subject = "Password Reset"
             send_email(request.form['email'], subject, html)
             flash("Done")
@@ -455,5 +484,54 @@ def account():
     return render_template('account.html',title = "Account",image = image_file)
 
 
+<<<<<<< Updated upstream
+=======
+@app.route('/ChangeProfile/', methods=['GET', 'POST'])
+@login_required
+def Change_Profile():
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
+
+
+        try:
+
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file = picture_file
+
+            current_user.user= request.form['user']
+
+            db.session.commit()
+            flash('Your account has been updated!', 'success')
+
+            return render_template('Change_profile.html',form = form)
+        except:
+            flash("Invalid Image")
+    return render_template('Change_profile.html',form = form)
+
+
+@app.route('/DeleteAccount/<string:user>', methods=['GET', 'POST'])
+@login_required
+def Deleteaccount(user):
+    form = Delete_account()
+    deleted = Friends.query.filter_by(user=user).first()
+
+    if form.validate_on_submit():
+        if not deleted.check_password(request.form['password']):
+            flash("Wrong password")
+        else:
+
+
+
+
+
+            db.session.delete(deleted)
+            db.session.commit()
+            logout()
+
+    return render_template("Delete_account.html",form = form,user = user)
+
+
+
+>>>>>>> Stashed changes
 if __name__ == '__main__':
     app.run()

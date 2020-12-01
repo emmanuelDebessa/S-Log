@@ -4,12 +4,12 @@
 
 {% block head %}
 {{ super() }}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
 {% endblock %}
 
 {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Welcome {{current_user.user}}</a>
+  <a class="navbar-brand" href='{{url_for("profile",user = current_user.user)}}'>Welcome {{current_user.user}}</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -31,7 +31,13 @@
         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
           <a class="dropdown-item" href="{{url_for('edit',user =current_user.user)}}">Change Password</a>
           <a class="dropdown-item"  href="{{url_for('Email_change',user =current_user.user)}}">Change Email</a>
+<<<<<<< Updated upstream
           <a class="dropdown-item" href="#">Change profile</a>
+=======
+          <a class="dropdown-item" href="{{url_for('Change_Profile')}}">Change profile</a>
+
+            <a class="dropdown-item" href="{{url_for('Deleteaccount',user = current_user.user)}}">Delete Account</a>
+>>>>>>> Stashed changes
         </div>
       </li>
     </ul>
