@@ -15,7 +15,7 @@ from flask_migrate import Migrate
 from _datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from wtforms import ValidationError
+from wtforms import ValidationError, TextAreaField
 from flask_login import LoginManager
 from flask_login import current_user, login_user
 from flask_login import login_required
@@ -166,6 +166,10 @@ class Reset(FlaskForm):
 
     submit = SubmitField("Submit")
 
+class PostForm(FlaskForm):
+    title = StringField('Title', validators.DataRequired("Required"))
+    content = TextAreaField('Body', validators.DataRequired("Required"))
+    submit = SubmitField('Post!')
 
 
 def generate_confirmation_token(email):
@@ -448,14 +452,17 @@ def get_post(id, check_author=True):
 @login_required
 def update(id):
     updated_post = get_post(id)
-    if request.method == "POST":
-        updated_post.post_content = request.form['post_content']
-        updated_post.post_title = request.form['post_title']
+    updateform = PostForm()
+    if updateform.validate_on_submit():
+        updated_post.post_title = updateform.title.data
+        updated_post.post_content = updateform.content.data
         db.session.commit()
-        flash('Post Updated!')
+        flash("Your post has been updated!")
         return redirect(url_for('view_posts'))
-    else:
-        return render_template('ViewPosts.html')
+    elif request.method == 'GET':
+        form.title.data = updated_post.post_title
+        form.content.data = updated_post.post_content
+    return render_template('ViewPosts.html', updateform=updateform)
 
 @app.route('/deletePost/<int:id>/', methods=['GET','POST'])
 @login_required
