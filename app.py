@@ -1,9 +1,10 @@
 from flask import Flask,request,redirect,flash
-from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import Form, BooleanField, StringField, PasswordField, validators,FileField
 from flask import render_template
-import secrets
 from PIL import Image
+import os
+import secrets
+from flask_wtf.file import FileField, FileAllowed
 ##from forms import InputLabels, Signin
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
@@ -32,7 +33,7 @@ app = Flask(__name__)
 application = app
 
 app.config['SECRET_KEY'] = 'hello123'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///relationships.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Recipe.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 465
@@ -54,32 +55,12 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'sign'
 mail = Mail(app)
-# perm = Perm(app)
 
 app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'sqlite:///Users',
     'posts':  'sqlite:///posts'
 }
-
-class UpdateAccountForm(FlaskForm):
-    user = StringField('Username',
-                           validators=[DataRequired()])
-
-    picture = FileField('Update Profile Picture', [FileAllowed(['jpg', 'png'])])
-    submit = SubmitField('Update')
-
-    def validate_username(self, username):
-        if username.data != current_user.username:
-            user = User.query.filter_by(username=username.data).first()
-            if user:
-                raise ValidationError('That username is taken. Please choose a different one.')
-
-    def validate_email(self, email):
-        if email.data != current_user.email:
-            user = User.query.filter_by(email=email.data).first()
-            if user:
-                raise ValidationError('That email is taken. Please choose a different one.')
 
 # other imports as necessary
 class UserPosts(db.Model):
@@ -101,8 +82,6 @@ class Friends(db.Model,UserMixin):
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
     posts = db.relationship('UserPosts', backref='author', lazy='dynamic')
-
-
 
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
@@ -174,6 +153,8 @@ class Change(FlaskForm):
              raise ValidationError('That email is taken. Please choose another.')
 
 class Change_pass(FlaskForm):
+    old_pass = PasswordField('Old Password', [validators.DataRequired("Required")])
+
     password = PasswordField('New Password', [validators.EqualTo('confirmation', message='Passwords must match'),
                                               validators.DataRequired("Required")])
 
@@ -181,17 +162,54 @@ class Change_pass(FlaskForm):
     submit = SubmitField("Submit")
 
 
+class Changepw(FlaskForm):
+
+
+    password = PasswordField('New Password', [validators.EqualTo('confirmation', message='Passwords must match'),
+                                              validators.DataRequired("Required")])
+
+    confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
+    submit = SubmitField("Submit")
+
+
+class Delete_account(FlaskForm):
+    password = PasswordField('Current Passwrd', [validators.EqualTo('confirmation', message='Passwords must match'),
+                                              validators.DataRequired("Required")])
+
+    confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
+    submit = SubmitField("Delete account forever")
+class UpdateAccountForm(FlaskForm):
+    user = StringField('Username',
+                          [validators.DataRequired()])
+
+    picture = FileField('Update Profile Picture', [FileAllowed(['jpg', 'png'])])
+    submit = SubmitField('Update')
+
+    def validate_username(self, username):
+        if username.data != current_user.username:
+            user = User.query.filter_by(username=username.data).first()
+            if user:
+                raise ValidationError('That username is taken. Please choose a different one.')
+
+    def validate_email(self, email):
+        if email.data != current_user.email:
+            user = User.query.filter_by(email=email.data).first()
+            if user:
+                raise ValidationError('That email is taken. Please choose a different one.')
+
 class Reset(FlaskForm):
     email = StringField("Email", [validators.length(min=5, message="Length must be 5+"),
                                   validators.email(message="Must be email")])
 
     submit = SubmitField("Submit")
 
+
 def save_picture(form_picture):
+
     random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture)
+    _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+    picture_path = os.path.join(app.root_path, 'static\\profile_images', picture_fn)
 
     output_size = (125, 125)
     i = Image.open(form_picture)
@@ -199,6 +217,7 @@ def save_picture(form_picture):
     i.save(picture_path)
 
     return picture_fn
+
 
 
 
@@ -242,7 +261,7 @@ def hi():
 
 
         print(token)
-        html = render_template('activate.html', confirm_url=confirm_url)
+        html = render_template('activate.html', confirm_url=confirm_url,user = user)
         subject = "Please confirm your email"
         send_email(email, subject, html)
         flash('A confirmation email has been sent via email.', 'success')
@@ -308,7 +327,7 @@ def logout():
 @app.route("/Password/<string:user>", methods=['GET', 'POST'])
 @login_required
 def edit(user):
-    form = Change()
+    form = Change_pass()
 
     user_to_update = Friends.query.filter_by(user = user).first_or_404()
 
@@ -318,9 +337,12 @@ def edit(user):
 
     if(form.validate_on_submit()):
 
-        if(request.form['email'] != user_to_update.email):
-            flash("Wrong Email")
+
+        if not user_to_update.check_password(request.form['old_pass']):
+            flash("Wrong password")
+
         else:
+
 
 
             user_to_update.password = request.form['password']
@@ -355,11 +377,10 @@ def Email_change(user):
             confirm_url = url_for('confirm_email', token=token, _external=True)
 
 
-            html = render_template('activate.html', confirm_url=confirm_url)
+            html = render_template('activate.html', confirm_url=confirm_url,user = user)
             subject = "Please confirm your email"
             send_email(request.form['email'], subject, html)
             flash('A confirmation email has been sent via email. You need to confirm your email before being able to login', 'success')
-            logout()
 
 
 
@@ -392,7 +413,7 @@ def Recover():
 
             token = generate_confirmation_token(email)
             confirm_url = url_for('confirm_pass', token=token, _external=True)
-            html = render_template('activate.html', confirm_url=confirm_url)
+            html = render_template('activate.html', confirm_url=confirm_url,user = user_to_update.user)
             subject = "Password Reset"
             send_email(request.form['email'], subject, html)
             flash("Done")
@@ -415,7 +436,7 @@ def Recover():
 @app.route('/confirm_pass/<token>' ,methods=['GET', 'POST'])
 
 def confirm_pass(token):
-    form = Change_pass()
+    form = Changepw()
 
     try:
         email = confirm_token(token)
@@ -430,7 +451,8 @@ def confirm_pass(token):
         db.session.commit()
         flash("done")
     else:
-        flash("broken")
+
+        flash("Enter Matching Passwords")
 
 
 
@@ -473,7 +495,6 @@ def send_email(to, subject, template):
         sender=app.config['MAIL_DEFAULT_SENDER']
     )
     mail.send(msg)
-
 def get_post(id, check_author=True):
     post = UserPosts.query.filter_by(id=id).first()
     return post
@@ -514,8 +535,6 @@ def view_posts():
         all_posts = UserPosts.query.order_by(UserPosts.post_date)
 
         return render_template('ViewPosts.html', all_posts=all_posts)
-
-
 @app.route('/Account')
 @login_required
 def account():
@@ -523,22 +542,58 @@ def account():
     return render_template('account.html',title = "Account",image = image_file)
 
 
+
 @app.route('/ChangeProfile/', methods=['GET', 'POST'])
 @login_required
 def Change_Profile():
     form = UpdateAccountForm()
+
     if form.validate_on_submit():
+
+
+
+
+
 
         picture_file = save_picture(form.picture.data)
         current_user.image_file = picture_file
 
-        current_user.username = form.username.data
-        current_user.email = form.email.data
+        current_user.user= request.form['user']
+
         db.session.commit()
         flash('Your account has been updated!', 'success')
 
+
         return render_template('Change_profile.html',form = form)
+
+
+
     return render_template('Change_profile.html',form = form)
+
+
+@app.route('/DeleteAccount/<string:user>', methods=['GET', 'POST'])
+@login_required
+def Deleteaccount(user):
+    form = Delete_account()
+    deleted = Friends.query.filter_by(user=user).first()
+
+    if form.validate_on_submit():
+        if not deleted.check_password(request.form['password']):
+            flash("Wrong password")
+        else:
+
+
+
+
+
+            db.session.delete(deleted)
+            db.session.commit()
+            logout()
+            return redirect(url_for("hi"))
+
+    return render_template("Delete_account.html",form = form,user = user)
+
+
 
 
 if __name__ == '__main__':

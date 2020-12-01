@@ -21,23 +21,9 @@
 <div class="container center_div" align=middle>
 <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-xs-12">
       <h2>Change Password</h2>
-  <form action="{{url_for('edit',user = current_user.user)}}" method="post">
+  <form action="{{url_for('Deleteaccount',user = current_user.user)}}" method="post">
     {{ form.hidden_tag() }}
 
-
-        <p>
-
-              {{ form.old_pass.label }} <br>
-            <ul>
-            {% for error in form.old_pass.errors %}
-            <li    style="color:red;" >
- {{ error }}
-            </li>
-            {% endfor %}
-
-        </ul>
-        {{ form.old_pass(size=30) }}
-    </p>
 
 
 >    <p>
@@ -85,9 +71,6 @@
 {% endwith %}
 
 </form>>
-    <p>
-     <a href='{{url_for("profile",user = user)}}' class="btn btn-lg btn-primary">Home</a>
-</p>
 
 
 
