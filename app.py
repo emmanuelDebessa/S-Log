@@ -482,7 +482,23 @@ def send_email(to, subject, template):
         sender=app.config['MAIL_DEFAULT_SENDER']
     )
     mail.send(msg)
+def get_post(id, check_author=True):
+    post = UserPosts.query.filter_by(id=id).first()
+    return post
 
+# @perm.current_user_loader(lambda: current_user)
+@app.route('/updatePost/<int:id>/', methods=['GET','POST'])
+@login_required
+def update(id):
+    updated_post = get_post(id)
+    if request.method == "POST":
+        updated_post.post_content = request.form['post_content']
+        updated_post.post_title = request.form['post_title']
+        db.session.commit()
+        flash('Post Updated!')
+        return redirect(url_for('view_posts'))
+    else:
+        return render_template('ViewPosts.html')
 
 @app.route('/deletePost/<int:id>/', methods=['GET','POST'])
 @login_required
@@ -506,7 +522,6 @@ def view_posts():
         all_posts = UserPosts.query.order_by(UserPosts.post_date)
 
         return render_template('ViewPosts.html', all_posts=all_posts)
-
 @app.route('/Account')
 @login_required
 def account():
