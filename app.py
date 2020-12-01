@@ -65,7 +65,9 @@ class UserPosts(db.Model):
     __bind_key__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
     post_date = db.Column(db.DateTime, default=datetime.utcnow)
-    post = db.Column(db.String(10,000), nullable=False)
+    post_content = db.Column(db.String(10,000), nullable=False)
+    post_title = db.Column(db.String(200), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
@@ -77,6 +79,7 @@ class Friends(db.Model,UserMixin):
     password_hash = db.Column(db.String(200),nullable = False)
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
+    posts = db.relationship('UserPosts', backref='author', lazy='dynamic')
 
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
@@ -481,11 +484,20 @@ def send_email(to, subject, template):
     mail.send(msg)
 
 
+@app.route('/deletePost/<int:id>/', methods=['GET','POST'])
+@login_required
+def delete(id):
+    deleted = get_post(id)
+    db.session.delete(deleted)
+    db.session.commit()
+    return redirect(url_for('view_posts'))
+
 @app.route('/ViewPosts', methods=['GET', 'POST'])
 def view_posts():
     if request.method == "POST":
-        usr_post = request.form['post']
-        new_post = UserPosts(post=usr_post)
+        usr_post = request.form['post_content']
+        usr_title = request.form['post_title']
+        new_post = UserPosts(post_content=usr_post,post_title=usr_title, author=current_user)
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('view_posts'))
@@ -494,7 +506,6 @@ def view_posts():
         all_posts = UserPosts.query.order_by(UserPosts.post_date)
 
         return render_template('ViewPosts.html', all_posts=all_posts)
-
 
 @app.route('/Account')
 @login_required
@@ -512,6 +523,7 @@ def Change_Profile():
 
 
         try:
+            print("trest")
 
             picture_file = save_picture(form.picture.data)
             current_user.image_file = picture_file
