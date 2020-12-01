@@ -31,13 +31,12 @@
         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
           <a class="dropdown-item" href="{{url_for('edit',user =current_user.user)}}">Change Password</a>
           <a class="dropdown-item"  href="{{url_for('Email_change',user =current_user.user)}}">Change Email</a>
-<<<<<<< Updated upstream
-          <a class="dropdown-item" href="#">Change profile</a>
-=======
+
+
           <a class="dropdown-item" href="{{url_for('Change_Profile')}}">Change profile</a>
 
             <a class="dropdown-item" href="{{url_for('Deleteaccount',user = current_user.user)}}">Delete Account</a>
->>>>>>> Stashed changes
+
         </div>
       </li>
     </ul>

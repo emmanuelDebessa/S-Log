@@ -20,26 +20,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="15e2bf08-5485-4346-9348-dd07d1fc1440" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Users" beforeDir="false" afterPath="$PROJECT_DIR$/Users" afterDir="false" />
-<<<<<<< Updated upstream
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/Edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Edit.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/Email_Update.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Email_Update.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/ViewPosts.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ViewPosts.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account.html" afterDir="false" />
-=======
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/posts" beforeDir="false" afterPath="$PROJECT_DIR$/posts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/static.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/static.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/Change_profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Change_profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/Edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Edit.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/activate.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/activate.html" afterDir="false" />
->>>>>>> Stashed changes
       <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/h.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/h.html" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,7 +41,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="JupyterTrust" id="b62ca708-97ee-4d0e-a40d-f434ba5e33a5" />
+  <component name="JupyterTrust" id="f2fbdd4b-0023-4357-b030-dbfb26c14137" />
   <component name="ProjectId" id="1kf2TvFD0KZhA3NvxJ9aYvQEACf" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -67,7 +52,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -82,8 +67,6 @@
     </option>
   </component>
   <component name="RunManager">
-<<<<<<< Updated upstream
-=======
     <configuration default="true" type="DjangoTestsConfigurationType">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -143,7 +126,6 @@
       <option name="launchJavascriptDebuger" value="false" />
       <method v="2" />
     </configuration>
->>>>>>> Stashed changes
     <configuration name="S-Log" type="PythonConfigurationType" factoryName="Python">
       <module name="S-Log" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -166,8 +148,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-<<<<<<< Updated upstream
-=======
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -254,7 +234,6 @@
       <option name="USE_PATTERN" value="false" />
       <method v="2" />
     </configuration>
->>>>>>> Stashed changes
   </component>
   <component name="SpellCheckerSettings" BundledDictionaries="0" Folders="0" CustomDictionaries="0" Dictionaries="0" CorrectionsLimit="5" DefaultDictionary="application-level" UseSingleDictionary="true" />
   <component name="SvnConfiguration">
@@ -273,6 +252,9 @@
       <workItem from="1606191562965" duration="7431000" />
       <workItem from="1606267791479" duration="5761000" />
       <workItem from="1606323022923" duration="11175000" />
+      <workItem from="1606432929311" duration="924000" />
+      <workItem from="1606441764602" duration="365000" />
+      <workItem from="1606446840418" duration="986000" />
     </task>
     <servers />
   </component>

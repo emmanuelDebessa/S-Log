@@ -168,8 +168,7 @@ class Reset(FlaskForm):
 
     submit = SubmitField("Submit")
 
-<<<<<<< Updated upstream
-=======
+
 def save_picture(form_picture):
 
     random_hex = secrets.token_hex(8)
@@ -185,7 +184,7 @@ def save_picture(form_picture):
     return picture_fn
 
 
->>>>>>> Stashed changes
+
 
 
 def generate_confirmation_token(email):
@@ -484,8 +483,7 @@ def account():
     return render_template('account.html',title = "Account",image = image_file)
 
 
-<<<<<<< Updated upstream
-=======
+
 @app.route('/ChangeProfile/', methods=['GET', 'POST'])
 @login_required
 def Change_Profile():
@@ -532,6 +530,6 @@ def Deleteaccount(user):
 
 
 
->>>>>>> Stashed changes
+
 if __name__ == '__main__':
     app.run()
