@@ -2,6 +2,8 @@ from flask import Flask,request,redirect,flash
 from wtforms import Form, BooleanField, StringField, PasswordField, validators,FileField
 from flask import render_template
 from PIL import Image
+import os
+import secrets
 from flask_wtf.file import FileField, FileAllowed
 ##from forms import InputLabels, Signin
 from flask_wtf.csrf import CSRFProtect
@@ -168,8 +170,7 @@ class Delete_account(FlaskForm):
 class UpdateAccountForm(FlaskForm):
     user = StringField('Username',
                           [validators.DataRequired()])
-    email = StringField('Email',
-                        [validators.DataRequired(), validators.email()])
+
     picture = FileField('Update Profile Picture', [FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
 
@@ -534,24 +535,27 @@ def account():
 @login_required
 def Change_Profile():
     form = UpdateAccountForm()
+
     if form.validate_on_submit():
 
 
-        try:
-            print("trest")
 
-            picture_file = save_picture(form.picture.data)
-            current_user.image_file = picture_file
 
-            current_user.user= request.form['user']
 
-            db.session.commit()
-            flash('Your account has been updated!', 'success')
-            return "hi"
 
-            return render_template('Change_profile.html',form = form)
-        except:
-            flash("Invalid Image")
+        picture_file = save_picture(form.picture.data)
+        current_user.image_file = picture_file
+
+        current_user.user= request.form['user']
+
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+       
+
+        return render_template('Change_profile.html',form = form)
+
+
+
     return render_template('Change_profile.html',form = form)
 
 
