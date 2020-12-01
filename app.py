@@ -161,6 +161,17 @@ class Change_pass(FlaskForm):
     confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
     submit = SubmitField("Submit")
 
+
+class Changepw(FlaskForm):
+
+
+    password = PasswordField('New Password', [validators.EqualTo('confirmation', message='Passwords must match'),
+                                              validators.DataRequired("Required")])
+
+    confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
+    submit = SubmitField("Submit")
+
+
 class Delete_account(FlaskForm):
     password = PasswordField('Current Passwrd', [validators.EqualTo('confirmation', message='Passwords must match'),
                                               validators.DataRequired("Required")])
@@ -425,7 +436,7 @@ def Recover():
 @app.route('/confirm_pass/<token>' ,methods=['GET', 'POST'])
 
 def confirm_pass(token):
-    form = Change_pass()
+    form = Changepw()
 
     try:
         email = confirm_token(token)
@@ -440,7 +451,8 @@ def confirm_pass(token):
         db.session.commit()
         flash("done")
     else:
-        flash("broken")
+
+        flash("Enter Matching Passwords")
 
 
 
@@ -550,7 +562,7 @@ def Change_Profile():
 
         db.session.commit()
         flash('Your account has been updated!', 'success')
-       
+
 
         return render_template('Change_profile.html',form = form)
 
@@ -577,6 +589,7 @@ def Deleteaccount(user):
             db.session.delete(deleted)
             db.session.commit()
             logout()
+            return redirect(url_for("hi"))
 
     return render_template("Delete_account.html",form = form,user = user)
 
