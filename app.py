@@ -59,7 +59,8 @@ mail = Mail(app)
 app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'sqlite:///Users',
-    'posts':  'sqlite:///posts'
+    'posts':  'sqlite:///posts',
+    'comments': 'sqlite:///comments'
 }
 
 class UpdateAccountForm(FlaskForm):
@@ -89,7 +90,8 @@ class UserPosts(db.Model):
     post_content = db.Column(db.String(10,000), nullable=False)
     post_title = db.Column(db.String(200), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
-    comments = db.relationship('Comment', backref='post', lazy='dynamic')
+    comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'))
+
 
 
 class Comment(db.Model):
@@ -98,7 +100,7 @@ class Comment(db.Model):
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey('userPosts.id'))
+    #post_id = db.Column(db.Integer, db.ForeignKey('UserPosts.id'))
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
