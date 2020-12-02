@@ -94,12 +94,14 @@ class UserPosts(db.Model):
 
 
 
+
 class Comment(db.Model):
     __bind_key__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    posts = db.relationship('UserPosts', backref='posts', lazy='dynamic')
     #post_id = db.Column(db.Integer, db.ForeignKey('UserPosts.id'))
 
 class Friends(db.Model,UserMixin):
