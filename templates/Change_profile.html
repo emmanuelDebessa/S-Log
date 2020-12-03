@@ -12,14 +12,13 @@
 {% extends "base.html" %}
 
 
-
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block page_content %}
 
 
 
-<div class="container center_div" align=middle>
-<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-xs-12">
+<div class = "login">
   <form action="{{url_for('Change_Profile')}}" method="post" enctype="multipart/form-data">
       {{ form.csrf_token }}
     {{ form.hidden_tag() }}
@@ -28,16 +27,8 @@
 
       <p>
 
-              {{ form.user.label }} <br>
-            <ul>
-            {% for error in form.user.errors %}
-            <li    style="color:red;" >
- {{ error }}
-            </li>
-            {% endfor %}
+              {{ wtf.form_field(form.user)  }} <br>
 
-        </ul>
-        {{ form.user(size=30) }}
     </p>
 
 
@@ -79,13 +70,13 @@
   {% endif %}
 {% endwith %}
 
-</form>>
+</form>
 
 
 
 
 </div>
-    </div>
+
 
 {% endblock %}
 

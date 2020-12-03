@@ -23,8 +23,16 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Users" beforeDir="false" afterPath="$PROJECT_DIR$/Users" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/posts" beforeDir="false" afterPath="$PROJECT_DIR$/posts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/static.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/static.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/Change_profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Change_profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/Delete_account.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Delete_account.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/Edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/Email_Update.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Email_Update.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/Homepage.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Homepage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/h.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/h.html" afterDir="false" />
     </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

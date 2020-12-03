@@ -114,11 +114,11 @@ class InputLabels(FlaskForm):
     user = StringField("Username",[validators.DataRequired("Required")])
 
 
-    password = PasswordField('New Password',[validators.EqualTo('confirmation', message='Passwords must match'),validators.DataRequired("Required")])
+    password = PasswordField('Password',[validators.EqualTo('confirmation', message='Passwords must match'),validators.DataRequired("Required")])
     confirmation = PasswordField('Repeat Password',[validators.DataRequired("Required")])
     submit = SubmitField("Sign up")
 
-    accept_tos = BooleanField("By Clicking here you agree to our TOS", [validators.DataRequired("Must click so we do not get sued")])
+    accept_tos = BooleanField("Agree to TOS", [validators.DataRequired("Must click so we do not get sued")])
     remember_me = BooleanField('Keep me logged in')
 
     def validate_user(self,user):
