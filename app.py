@@ -496,6 +496,38 @@ def view_posts():
         all_posts = Posts.query.order_by(Posts.post_date)
 
         return render_template('ViewPosts.html', all_posts=all_posts)
+<<<<<<< Updated upstream
+=======
+
+
+@app.route('/post_votes/<post_id>/<action_vote>', methods=['GET', 'POST'])
+@login_required
+def post_vote(post_id, action_vote):
+    post = get_post(post_id)
+    vote = Vote.query.filter_by(
+        user = current_user,
+        post = post).first()
+    if vote:
+        if vote.upvote != bool(int(action_vote)):
+            vote.upvote = bool(int(action_vote))
+            db.session.commit()
+            return redirect(url_for('view_posts', post_id = post.id))
+        else:
+            flash('You voted for this post already')
+            return redirect(url_for('view_posts', post_id = post.id))
+
+    vote = Vote(user = current_user, post = post, upvote = bool(int(action_vote)))
+    db.session.add(vote)
+    db.session.commit()
+    return redirect(url_for('view_posts', post_id = post.id))
+
+@app.route('/Account')
+@login_required
+def account():
+    image_file = url_for('static', filename='profile_images/' + current_user.image_file)
+    return render_template('account.html',title = "Account",image = image_file)
+
+>>>>>>> Stashed changes
 
 
 <<<<<<< Updated upstream
