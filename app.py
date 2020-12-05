@@ -173,7 +173,7 @@ class Changepw(FlaskForm):
 
 
 class Delete_account(FlaskForm):
-    password = PasswordField('Current Passwrd', [validators.EqualTo('confirmation', message='Passwords must match'),
+    password = PasswordField('Current Password', [validators.EqualTo('confirmation', message='Passwords must match'),
                                               validators.DataRequired("Required")])
 
     confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
@@ -316,6 +316,7 @@ def sign():
 @app.route('/Profile/<string:user>',methods=['GET','POST'])
 @login_required
 def profile(user):
+
     return render_template("Homepage.html",user = user)
 
 @app.route("/logout")
@@ -535,11 +536,29 @@ def view_posts():
         all_posts = UserPosts.query.order_by(UserPosts.post_date)
 
         return render_template('ViewPosts.html', all_posts=all_posts)
-@app.route('/Account')
-@login_required
-def account():
-    image_file = url_for('static', filename='profile_images/' + current_user.image_file)
-    return render_template('account.html',title = "Account",image = image_file)
+@app.route('/Account/<string:user>')
+
+def account(user):
+    email = Friends.query.filter_by(user=user).first()
+    image_file = url_for('static', filename='profile_images/' + email.image_file)
+    return render_template('account.html',title = "Account",image = image_file,user = email.user,email= email.email)
+
+
+@app.route('/Search/<string:user>', methods=['GET', 'POST'])
+def search(user):
+    if request.method == 'POST':
+        #email = Friends.query.filter_by(user=user).first()
+        email = Friends.query.filter_by(user=request.form['searchbar']).first()
+        if(email is not None):
+            image_file = url_for('static', filename='profile_images/' + email.image_file)
+            return render_template('account.html', title="Account", image=image_file, user=email.user, email=email.email)
+        else:
+            flash("No username")
+            return redirect(url_for("profile",user = user))
+
+
+
+
 
 
 
