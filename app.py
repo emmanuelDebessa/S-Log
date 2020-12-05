@@ -57,17 +57,35 @@ mail = Mail(app)
 app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'sqlite:///Users',
-    'posts':  'sqlite:///posts'
+    'posts':  'sqlite:///posts',
+    'votes':  'sqlite:///votes'
 }
 
+class Vote(db.Model):
+    __bind_key__ = 'votes'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    # user = db.relationship('Friends', backref=db.backref('user_post_votes'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))#issue is this line. Can not find Posts.id
+    # post = db.relationship('Posts', backref=db.backref('post_votes'))
+    upvote = db.Column(db.Boolean, nullable = False)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        if self.upvote == True:
+            vote = 'Up'
+        else:
+            vote = 'Down'
+        return '<Vote - {}, from {} for {}>'.format(vote, self.user.user, self.post.post_title)
 # other imports as necessary
-class UserPosts(db.Model):
+class Posts(db.Model):
     __bind_key__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
     post_date = db.Column(db.DateTime, default=datetime.utcnow)
     post_content = db.Column(db.String(10,000), nullable=False)
     post_title = db.Column(db.String(200), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    post_votes = db.relationship('Vote', backref='post_votes', lazy='dynamic')
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
@@ -79,7 +97,8 @@ class Friends(db.Model,UserMixin):
     password_hash = db.Column(db.String(200),nullable = False)
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
-    posts = db.relationship('UserPosts', backref='author', lazy='dynamic')
+    posts = db.relationship('Posts', backref='author', lazy='dynamic')
+    user_post_vote = db.relationship('Vote', backref='author', lazy='dynamic')
 
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
@@ -438,7 +457,7 @@ def send_email(to, subject, template):
     mail.send(msg)
 
 def get_post(id, check_author=True):
-    post = UserPosts.query.filter_by(id=id).first()
+    post = Posts.query.filter_by(id=id).first()
     return post
 
 # @perm.current_user_loader(lambda: current_user)
@@ -468,17 +487,41 @@ def view_posts():
     if request.method == "POST":
         usr_post = request.form['post_content']
         usr_title = request.form['post_title']
-        new_post = UserPosts(post_content=usr_post,post_title=usr_title, author=current_user)
+        new_post = Posts(post_content=usr_post,post_title=usr_title, author=current_user)
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('view_posts'))
 
     else:
-        all_posts = UserPosts.query.order_by(UserPosts.post_date)
+        all_posts = Posts.query.order_by(Posts.post_date)
 
         return render_template('ViewPosts.html', all_posts=all_posts)
 
 
+<<<<<<< Updated upstream
+=======
+@app.route('/post_votes/<post_id>/<action_vote>', methods=['GET', 'POST'])
+@login_required
+def post_vote(post_id, action_vote):
+    post = get_post(post_id)
+    vote = Vote.query.filter_by(
+        user = current_user,
+        post = post).first()
+    if vote:
+        if vote.upvote != bool(int(action_vote)):
+            vote.upvote = bool(int(action_vote))
+            db.session.commit()
+            return redirect(url_for('view_posts', post_id = post.id))
+        else:
+            flash('You voted for this post already')
+            return redirect(url_for('view_posts', post_id = post.id))
+
+    vote = Vote(user = current_user, post = post, upvote = bool(int(action_vote)))
+    db.session.add(vote)
+    db.session.commit()
+    return redirect(url_for('view_posts', post_id = post.id))
+
+>>>>>>> Stashed changes
 @app.route('/Account')
 @login_required
 def account():
