@@ -9,7 +9,16 @@
 body{
     background-color: #f9f9f9;
 }
+#hi{
 
+
+    position: absolute;
+    top: 30%;
+    left: 45%;
+    margin-top: -50px;
+    margin-left: -50px;
+
+}​
 
 
 @media (max-width: 767px) {

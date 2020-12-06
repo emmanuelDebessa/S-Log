@@ -19,7 +19,7 @@ from flask_migrate import Migrate
 from _datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from wtforms import ValidationError
+from wtforms import ValidationError,TextAreaField
 from flask_login import LoginManager
 from flask_login import current_user, login_user
 from flask_login import login_required
@@ -161,6 +161,10 @@ class Change_pass(FlaskForm):
     confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
     submit = SubmitField("Submit")
 
+class PostForm(FlaskForm):
+    title = StringField('Title')
+    content = TextAreaField('Body')
+    submit = SubmitField('Post!')
 
 class Changepw(FlaskForm):
 
@@ -179,8 +183,7 @@ class Delete_account(FlaskForm):
     confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
     submit = SubmitField("Delete account forever")
 class UpdateAccountForm(FlaskForm):
-    user = StringField('Username',
-                          [validators.DataRequired()])
+    user = StringField('Username')
 
     picture = FileField('Update Profile Picture', [FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
@@ -500,19 +503,23 @@ def get_post(id, check_author=True):
     post = UserPosts.query.filter_by(id=id).first()
     return post
 
-# @perm.current_user_loader(lambda: current_user)
 @app.route('/updatePost/<int:id>/', methods=['GET','POST'])
 @login_required
 def update(id):
     updated_post = get_post(id)
-    if request.method == "POST":
-        updated_post.post_content = request.form['post_content']
-        updated_post.post_title = request.form['post_title']
+    form = PostForm()
+    if form.validate_on_submit():
+        updated_post.post_title = form.title.data
+        updated_post.post_content = form.content.data
         db.session.commit()
-        flash('Post Updated!')
+        flash("Your post has been updated!")
         return redirect(url_for('view_posts'))
-    else:
-        return render_template('ViewPosts.html')
+    elif request.method == 'GET':
+        form.title.data = updated_post.post_title
+        form.content.data = updated_post.post_content
+    #return render_template('ViewPosts.html', form=form)
+    return render_template("UpdatePost.html", form=form, id=id)
+
 
 @app.route('/deletePost/<int:id>/', methods=['GET','POST'])
 @login_required
@@ -534,7 +541,8 @@ def view_posts():
 
     else:
         all_posts = UserPosts.query.order_by(UserPosts.post_date)
-
+        for item in all_posts:
+            print(item.id)
         return render_template('ViewPosts.html', all_posts=all_posts)
 @app.route('/Account/<string:user>')
 
@@ -544,8 +552,8 @@ def account(user):
     return render_template('account.html',title = "Account",image = image_file,user = email.user,email= email.email)
 
 
-@app.route('/Search/<string:user>', methods=['GET', 'POST'])
-def search(user):
+@app.route('/Search/', methods=['GET', 'POST'])
+def search():
     if request.method == 'POST':
         #email = Friends.query.filter_by(user=user).first()
         email = Friends.query.filter_by(user=request.form['searchbar']).first()
@@ -554,7 +562,7 @@ def search(user):
             return render_template('account.html', title="Account", image=image_file, user=email.user, email=email.email)
         else:
             flash("No username")
-            return redirect(url_for("profile",user = user))
+            return redirect(url_for("profile",user = current_user.user))
 
 
 
@@ -573,14 +581,22 @@ def Change_Profile():
 
 
 
+        if(form.picture.data is None and (request.form['user'] =='')):
+            flash("Invalid Picture and no change")
 
-        picture_file = save_picture(form.picture.data)
-        current_user.image_file = picture_file
+        else:
+            if form.picture.data is None:
+                pass
+            else:
 
-        current_user.user= request.form['user']
+             picture_file = save_picture(form.picture.data)
+             current_user.image_file = picture_file
 
-        db.session.commit()
-        flash('Your account has been updated!', 'success')
+
+            current_user.user = request.form['user']
+
+            db.session.commit()
+            flash('Your account has been updated!', 'success')
 
 
         return render_template('Change_profile.html',form = form)
