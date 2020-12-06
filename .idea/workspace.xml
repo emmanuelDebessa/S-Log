@@ -21,12 +21,8 @@
   <component name="ChangeListManager">
     <list default="true" id="15e2bf08-5485-4346-9348-dd07d1fc1440" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Users" beforeDir="false" afterPath="$PROJECT_DIR$/Users" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/posts" beforeDir="false" afterPath="$PROJECT_DIR$/posts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/Delete_account.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Delete_account.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/account.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ViewPosts.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ViewPosts.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

@@ -38,7 +38,7 @@
               </button>
             </div>
             <div class="modal-body">
-                <form class="updatedForm" action="" method="POST">
+                <form class="updatedForm" action="{{url_for('update',id= 2)}}" method="POST">
                     <label for="title">Title</label>
                     <textarea name="post_title" class="form-control" rows="1" ></textarea>
                     <br>
@@ -65,7 +65,7 @@
                 <p>{{ currPost.post_content }}</p>
                 {% if currPost.author.user == current_user.user %}
                 <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateModal" data-whatever="@mdo">Update Post</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateModal"  data-whatever="@mdo"   id = {{currPost.id}}>Update Post</button>
                 {% endif %}
             </div>
         </div>
