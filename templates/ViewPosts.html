@@ -38,7 +38,7 @@
               </button>
             </div>
             <div class="modal-body">
-                <form class="updatedForm" action="" method="POST">
+                <form class="updatedForm" name="updatedForm" action="" method="POST">
                     <label for="title">Title</label>
                     <textarea name="post_title" class="form-control" rows="1" ></textarea>
                     <br>
@@ -67,6 +67,16 @@
                 <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateModal" data-whatever="@mdo">Update Post</button>
                 {% endif %}
+                {% if current_user.has_liked_post(currPost) %}
+                  <a href="{{ url_for('post_vote', post_id=currPost.id, action='unlike') }}">
+                    <span class="glyphicon glyphicon-thumbs-up"></span>
+                  </a>
+                {% else %}
+                  <a href="{{ url_for('post_vote', post_id=currPost.id, action='like') }}">
+                    <span class="glyphicon glyphicon-thumbs-down"></span>
+                  </a>
+                {% endif %}
+            
             </div>
         </div>
         {% endfor %}

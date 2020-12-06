@@ -85,6 +85,7 @@ class Posts(db.Model):
     post_content = db.Column(db.String(10,000), nullable=False)
     post_title = db.Column(db.String(200), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    likes = db.Column(db.Integer, nullable=False)
     post_votes = db.relationship('Vote', backref='post_votes', lazy='dynamic')
 
 class Friends(db.Model,UserMixin):
@@ -99,6 +100,24 @@ class Friends(db.Model,UserMixin):
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
     posts = db.relationship('Posts', backref='author', lazy='dynamic')
     user_post_vote = db.relationship('Vote', backref='author', lazy='dynamic')
+
+    def like_post(self, post):
+        if not self.has_liked_post(post):
+            like = Vote(user_id=self.id, post_id=post.id)
+            post.likes = post.likes + 1
+            db.session.add(like)
+
+    def unlike_post(self, post):
+        if self.has_liked_post(post):
+            Vote.query.filter_by(
+                user_id=self.id,
+                post_id=post.id).delete()
+            post.likes = post.likes - 1
+
+    def has_liked_post(self, post):
+        return Vote.query.filter(
+            Vote.user_id == self.id,
+            Vote.post_id == post.id).count() > 0
 
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
@@ -470,9 +489,9 @@ def update(id):
         updated_post.post_title = request.form['post_title']
         db.session.commit()
         flash('Post Updated!')
-        return redirect(url_for('view_posts'))
+        return redirect(url_for('view_posts'), updated_post=updated_post)
     else:
-        return render_template('ViewPosts.html')
+        return render_template('ViewPosts.html',)
 
 @app.route('/deletePost/<int:id>/', methods=['GET','POST'])
 @login_required
@@ -494,66 +513,21 @@ def view_posts():
 
     else:
         all_posts = Posts.query.order_by(Posts.post_date)
-
         return render_template('ViewPosts.html', all_posts=all_posts)
-<<<<<<< Updated upstream
-=======
 
 
 @app.route('/post_votes/<post_id>/<action_vote>', methods=['GET', 'POST'])
 @login_required
 def post_vote(post_id, action_vote):
     post = get_post(post_id)
-    vote = Vote.query.filter_by(
-        user = current_user,
-        post = post).first()
-    if vote:
-        if vote.upvote != bool(int(action_vote)):
-            vote.upvote = bool(int(action_vote))
-            db.session.commit()
-            return redirect(url_for('view_posts', post_id = post.id))
-        else:
-            flash('You voted for this post already')
-            return redirect(url_for('view_posts', post_id = post.id))
+    if action_vote == 'like':
+        current_user.like_post(post)
+        db.session.commit()
+    if action_vote == 'unlike':
+        current_user.unlike_post(post)
+        db.session.commit()
+    return redirect(url_for('view_posts'))
 
-    vote = Vote(user = current_user, post = post, upvote = bool(int(action_vote)))
-    db.session.add(vote)
-    db.session.commit()
-    return redirect(url_for('view_posts', post_id = post.id))
-
-@app.route('/Account')
-@login_required
-def account():
-    image_file = url_for('static', filename='profile_images/' + current_user.image_file)
-    return render_template('account.html',title = "Account",image = image_file)
-
->>>>>>> Stashed changes
-
-
-<<<<<<< Updated upstream
-=======
-@app.route('/post_votes/<post_id>/<action_vote>', methods=['GET', 'POST'])
-@login_required
-def post_vote(post_id, action_vote):
-    post = get_post(post_id)
-    vote = Vote.query.filter_by(
-        user = current_user,
-        post = post).first()
-    if vote:
-        if vote.upvote != bool(int(action_vote)):
-            vote.upvote = bool(int(action_vote))
-            db.session.commit()
-            return redirect(url_for('view_posts', post_id = post.id))
-        else:
-            flash('You voted for this post already')
-            return redirect(url_for('view_posts', post_id = post.id))
-
-    vote = Vote(user = current_user, post = post, upvote = bool(int(action_vote)))
-    db.session.add(vote)
-    db.session.commit()
-    return redirect(url_for('view_posts', post_id = post.id))
-
->>>>>>> Stashed changes
 @app.route('/Account')
 @login_required
 def account():
