@@ -167,8 +167,8 @@ class Reset(FlaskForm):
     submit = SubmitField("Submit")
 
 class PostForm(FlaskForm):
-    title = StringField('Title', validators.DataRequired("Required"))
-    content = TextAreaField('Body', validators.DataRequired("Required"))
+    title = StringField('Title')
+    content = TextAreaField('Body')
     submit = SubmitField('Post!')
 
 
@@ -448,21 +448,39 @@ def get_post(id, check_author=True):
     return post
 
 # @perm.current_user_loader(lambda: current_user)
+
+# @app.route('/updatePost/<int:id>/', methods=['GET','POST'])
+# @login_required
+# def update(id):
+#     updated_post = get_post(id)
+#     if request.method == "POST":
+#         updated_post.post_content = request.form['post_content']
+#         updated_post.post_title = request.form['post_title']
+#         db.session.commit()
+#         flash('Post Updated!')
+#         return redirect(url_for('view_posts'), updated_post=updated_post)
+#     else:
+#         return render_template('ViewPosts.html',)
+
+
 @app.route('/updatePost/<int:id>/', methods=['GET','POST'])
 @login_required
 def update(id):
     updated_post = get_post(id)
-    updateform = PostForm()
-    if updateform.validate_on_submit():
-        updated_post.post_title = updateform.title.data
-        updated_post.post_content = updateform.content.data
+    form = PostForm()
+    if form.validate_on_submit():
+        updated_post.post_title = form.title.data
+        updated_post.post_content = form.content.data
         db.session.commit()
         flash("Your post has been updated!")
         return redirect(url_for('view_posts'))
     elif request.method == 'GET':
         form.title.data = updated_post.post_title
         form.content.data = updated_post.post_content
-    return render_template('ViewPosts.html', updateform=updateform)
+    #return render_template('ViewPosts.html', form=form)
+    return render_template("UpdatePost.html", form=form, id=id)
+
+
 
 @app.route('/deletePost/<int:id>/', methods=['GET','POST'])
 @login_required
