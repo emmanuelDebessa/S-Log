@@ -28,24 +28,37 @@
         <input type="submit" value="Post!" class="btn btn-primary">
     </form>
 
-    <div id="postList">
+   <div id="postList">
         <h2>Posts</h2>
         {% for currPost in all_posts %}
-        <div id="userPost" class="card bg-light mb-3">
-            <!-- <div class="card-header"></div>
-            <div class="card-header"></div> -->
-            <div class="card-header">
-                <h5 id="postAuthor">{{ currPost.author.user}}</h5>
-                <p id="postDate">{{  currPost.post_date }} </p></div>
-                <h4 id="postName">{{ currPost.post_title }}</h4>
-            <div class="card-body">
-                <p>{{ currPost.post_content }}</p>
-                {% if currPost.author.user == current_user.user %}
-                <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
-                <a href="/updatePost/{{currPost.id}}" class="btn btn-primary btn-sm">Update Post</a>
-                {% endif %}
-            </div>
-        </div>
+        {% if currPost.author.user == current_user.user %}
+          <div id="userPost" class="card bg-light mb-3">
+              <!-- <div class="card-header"></div>
+              <div class="card-header"></div> -->
+              <div class="card-header">
+                  <h5 id="postAuthor">{{ currPost.author.user}}</h5>
+                  <p id="postDate">{{  currPost.post_date }} </p></div>
+                  <h4 id="postName">{{ currPost.post_title }}</h4>
+              <div class="card-body">
+                  <p>{{ currPost.post_content }}</p>
+
+                  <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
+                     <a href="/updatePost/{{currPost.id}}" class="btn btn-primary btn-sm">Update Post</a>
+
+                  {% if current_user.has_liked_post(currPost) %}
+                    <a href="{{ url_for('post_vote', post_id=currPost.id, action_vote='unlike') }}">
+                      <span class="glyphicon glyphicon-thumbs-down"></span>
+                    </a>
+                  {% else %}
+                    <a href="{{ url_for('post_vote', post_id=currPost.id, action_vote='like') }}">
+                      <span class="glyphicon glyphicon-thumbs-up"></span>
+                    </a>
+                  {% endif %}
+                  <p>{{currPost.likes}}</p>
+
+              </div>
+          </div>
+        {% endif %}
         {% endfor %}
 
     </div>
@@ -61,3 +74,5 @@
 
 </body>
 </html>
+
+

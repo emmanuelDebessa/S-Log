@@ -59,17 +59,38 @@ mail = Mail(app)
 app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'sqlite:///Users',
-    'posts':  'sqlite:///posts'
+    'posts':  'sqlite:///posts',
+    'votes': 'sqlite:///votes'
 }
 
 # other imports as necessary
-class UserPosts(db.Model):
-    __bind_key__ = 'posts'
+class Vote(db.Model):
+    __bind_key__ = 'votes'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    # user = db.relationship('Friends', backref=db.backref('user_post_votes'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))#issue is this line. Can not find Posts.id
+    # post = db.relationship('Posts', backref=db.backref('post_votes'))
+    # upvote = db.Column(db.Boolean, nullable = False)
+    # timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        if self.upvote == True:
+            vote = 'Up'
+        else:
+            vote = 'Down'
+        return '<Vote - {}, from {} for {}>'.format(vote, self.user.user, self.post.post_title)
+
+
+class Posts(db.Model):
+    _bind_key__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
     post_date = db.Column(db.DateTime, default=datetime.utcnow)
-    post_content = db.Column(db.String(10,000), nullable=False)
+    post_content = db.Column(db.String(10, 000), nullable=False)
     post_title = db.Column(db.String(200), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    likes = db.Column(db.Integer, nullable=False)
+    post_votes = db.relationship('Vote', backref='post_votes', lazy='dynamic')
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
@@ -81,7 +102,26 @@ class Friends(db.Model,UserMixin):
     password_hash = db.Column(db.String(200),nullable = False)
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
-    posts = db.relationship('UserPosts', backref='author', lazy='dynamic')
+    posts = db.relationship('Posts', backref='author', lazy='dynamic')
+    user_post_vote = db.relationship('Vote', backref='author', lazy='dynamic')
+
+    def like_post(self, post):
+        if not self.has_liked_post(post):
+            like = Vote(user_id=self.id, post_id=post.id)
+            post.likes = post.likes + 1
+            db.session.add(like)
+
+    def unlike_post(self, post):
+        if self.has_liked_post(post):
+            Vote.query.filter_by(
+                user_id=self.id,
+                post_id=post.id).delete()
+            post.likes = post.likes - 1
+
+    def has_liked_post(self, post):
+        return Vote.query.filter(
+            Vote.user_id == self.id,
+            Vote.post_id == post.id).count() > 0
 
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
@@ -500,7 +540,7 @@ def send_email(to, subject, template):
     )
     mail.send(msg)
 def get_post(id, check_author=True):
-    post = UserPosts.query.filter_by(id=id).first()
+    post = Posts.query.filter_by(id=id).first()
     return post
 
 @app.route('/updatePost/<int:id>/', methods=['GET','POST'])
@@ -534,18 +574,34 @@ def view_posts():
     if request.method == "POST":
         usr_post = request.form['post_content']
         usr_title = request.form['post_title']
-        new_post = UserPosts(post_content=usr_post,post_title=usr_title, author=current_user)
+        new_post = Posts(post_content=usr_post,post_title=usr_title, author=current_user, likes=0)
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('view_posts'))
 
     else:
-        all_posts = UserPosts.query.order_by(UserPosts.post_date)
-        for item in all_posts:
-            print(item.id)
+        all_posts = Posts.query.order_by(Posts.post_date)
         return render_template('ViewPosts.html', all_posts=all_posts)
-@app.route('/Account/<string:user>')
 
+@app.route('/Trending', methods=['GET', 'POST'])
+@login_required
+def trending():
+        all_posts = Posts.query.order_by(Posts.likes)
+        return render_template('Trending.html', all_posts=all_posts)
+
+
+@app.route('/post_votes/<post_id>/<action_vote>', methods=['GET', 'POST'])
+@login_required
+def post_vote(post_id, action_vote):
+    post = get_post(post_id)
+    if action_vote == 'like':
+        current_user.like_post(post)
+        db.session.commit()
+    if action_vote == 'unlike':
+        current_user.unlike_post(post)
+        db.session.commit()
+    return redirect(url_for('view_posts'))
+@app.route('/Account/<string:user>')
 def account(user):
     email = Friends.query.filter_by(user=user).first()
     image_file = url_for('static', filename='profile_images/' + email.image_file)

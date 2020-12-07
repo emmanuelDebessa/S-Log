@@ -10,7 +10,27 @@
     <title>Title</title>
 {% extends "base.html" %}
 
+  <div id="postList">
+        <h2>Posts</h2>
+        {% for currPost in all_posts %}
+        <div id="userPost" class="card bg-light mb-3">
+            <!-- <div class="card-header"></div>
+            <div class="card-header"></div> -->
+            <div class="card-header">
+                <h5 id="postAuthor">{{ currPost.author.user}}</h5>
+                <p id="postDate">{{  currPost.post_date }} </p></div>
+                <h4 id="postName">{{ currPost.post_title }}</h4>
+            <div class="card-body">
+                <p>{{ currPost.post_content }}</p>
+                {% if currPost.author.user == current_user.user %}
+                <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
+                <a href="/updatePost/{{currPost.id}}" class="btn btn-primary btn-sm">Update Post</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
 
+    </div>
 
 </head>
 <body>
