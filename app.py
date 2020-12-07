@@ -359,8 +359,8 @@ def sign():
 @app.route('/Profile/<string:user>',methods=['GET','POST'])
 @login_required
 def profile(user):
-
-    return render_template("Homepage.html",user = user)
+    all_posts = Posts.query.order_by(Posts.likes)
+    return render_template("Homepage.html",all_posts= all_posts)
 
 @app.route("/logout")
 def logout():
