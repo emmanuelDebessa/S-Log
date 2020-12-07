@@ -18,43 +18,41 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
 {% endblock %}
 {% block page_content %}
-    <!-- create post -->
-    <form class="postForm" action="" method="POST">
-        <label for="title">Title</label>
-        <textarea name="post_title" class="form-control" rows="1" ></textarea>
-        <br>
-        <label for="body">Body</label>
-        <textarea name="post_content" class="form-control" rows="7" ></textarea>
-        <input type="submit" value="Post!" class="btn btn-primary">
-    </form>
-    <!-- update post -->
-    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Update</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-                <form class="updatedForm" name="updatedForm" action="" method="POST">
-                    <label for="title">Title</label>
-                    <textarea name="post_title" class="form-control" rows="1" ></textarea>
-                    <br>
-                    <label for="body">Body</label>
-                    <textarea name="post_content" class="form-control" rows="7" ></textarea>
-                    <input type="submit" value="Post!" class="btn btn-primary">
-                </form>
-            </div>
-          </div>
+{% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Welcome {{user}}</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul class="navbar-nav">
+    <li class="nav-item active">
+        <a class="nav-link" href="{{url_for('account')}}">Profile <span class="sr-only">(current)</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"  href="{{url_for('view_posts')}}">Posts</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#">Comments</a>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Settings
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+        <a class="dropdown-item" href="{{url_for('edit',user =user)}}">Change Password</a>
+        <a class="dropdown-item"  href="{{url_for('Email_change',user =user)}}">Change Email</a>
+        <a class="dropdown-item" href="#">Change profile</a>
         </div>
-      </div>
-    
+    </li>
+    </ul>
+    </div>
+        <a class="btn btn-outline-primary" href="{{url_for('logout')}}">Log out</a>
+    </nav>
+{% endblock %}    
     <div id="postList">
         <h2>Posts</h2>
         {% for currPost in all_posts %}
-        {% if currPost.author.user == current_user.user %}
           <div id="userPost" class="card bg-light mb-3">
               <!-- <div class="card-header"></div>
               <div class="card-header"></div> -->
@@ -64,24 +62,22 @@
                   <h4 id="postName">{{ currPost.post_title }}</h4>
               <div class="card-body">
                   <p>{{ currPost.post_content }}</p>
-                  
+                  {% if currPost.author.user == current_user.user %}
                   <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
                   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateModal" data-whatever="@mdo">Update Post</button>
-                  
+                  {% endif %}      
                   {% if current_user.has_liked_post(currPost) %}
                     <a href="{{ url_for('post_vote', post_id=currPost.id, action_vote='unlike') }}">
-                      <span class="glyphicon glyphicon-thumbs-down"></span>
+                      <span class="glyphicon glyphicon-thumbs-up"></span>
                     </a>
                   {% else %}
                     <a href="{{ url_for('post_vote', post_id=currPost.id, action_vote='like') }}">
-                      <span class="glyphicon glyphicon-thumbs-up"></span>
+                      <span class="glyphicon glyphicon-thumbs-down"></span>
                     </a>
                   {% endif %}
                   <p>{{currPost.likes}}</p>
-              
               </div>
           </div>
-        {% endif %}
         {% endfor %}
            
     </div>     

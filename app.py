@@ -68,8 +68,8 @@ class Vote(db.Model):
     # user = db.relationship('Friends', backref=db.backref('user_post_votes'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))#issue is this line. Can not find Posts.id
     # post = db.relationship('Posts', backref=db.backref('post_votes'))
-    upvote = db.Column(db.Boolean, nullable = False)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    # upvote = db.Column(db.Boolean, nullable = False)
+    # timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def __repr__(self):
         if self.upvote == True:
@@ -506,7 +506,7 @@ def view_posts():
     if request.method == "POST":
         usr_post = request.form['post_content']
         usr_title = request.form['post_title']
-        new_post = Posts(post_content=usr_post,post_title=usr_title, author=current_user)
+        new_post = Posts(post_content=usr_post,post_title=usr_title, author=current_user, likes=0)
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('view_posts'))
@@ -514,6 +514,12 @@ def view_posts():
     else:
         all_posts = Posts.query.order_by(Posts.post_date)
         return render_template('ViewPosts.html', all_posts=all_posts)
+
+@app.route('/Trending', methods=['GET', 'POST'])
+@login_required
+def trending():
+        all_posts = Posts.query.order_by(Posts.likes)
+        return render_template('Trending.html', all_posts=all_posts)
 
 
 @app.route('/post_votes/<post_id>/<action_vote>', methods=['GET', 'POST'])
