@@ -1,52 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-
-</style>
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">\
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/static.css') }}">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <meta charset="UTF-8">
     <title>Title</title>
+</head>
 
-{% extends "bootstrap/base.html" %}
+<body>
 
+
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Your Posts{% endblock %}
+{% block head %}
+{{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
+{% endblock %}
+{% block page_content %}
 {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Welcome {{user}}</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+    <a class="navbar-brand" href="#">Welcome {{user}}</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav">
-      <li class="nav-item active">
+    <li class="nav-item active">
         <a class="nav-link" href="{{url_for('account')}}">Profile <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
+    </li>
+    <li class="nav-item">
         <a class="nav-link"  href="{{url_for('view_posts')}}">Posts</a>
-      </li>
-      <li class="nav-item">
+    </li>
+    <li class="nav-item">
         <a class="nav-link" href="#">Comments</a>
-      </li>
-      <li class="nav-item dropdown">
+    </li>
+    <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Settings
+        Settings
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <a class="dropdown-item" href="{{url_for('edit',user =user)}}">Change Password</a>
-          <a class="dropdown-item"  href="{{url_for('Email_change',user =user)}}">Change Email</a>
-          <a class="dropdown-item" href="#">Change profile</a>
+        <a class="dropdown-item" href="{{url_for('edit',user =user)}}">Change Password</a>
+        <a class="dropdown-item"  href="{{url_for('Email_change',user =user)}}">Change Email</a>
+        <a class="dropdown-item" href="#">Change profile</a>
         </div>
-      </li>
+    </li>
     </ul>
-  </div>
-           <a class="btn btn-outline-primary" href="{{url_for('logout')}}">Log out</a>
-</nav>
+    </div>
+        <a class="btn btn-outline-primary" href="{{url_for('logout')}}">Log out</a>
+    </nav>
+{% endblock %}    
+    <div id="postList">
+        <h2>Posts</h2>
+        {% for currPost in all_posts %}
+          <div id="userPost" class="card bg-light mb-3">
+              <!-- <div class="card-header"></div>
+              <div class="card-header"></div> -->
+              <div class="card-header">
+                  <h5 id="postAuthor">{{ currPost.author.user}}</h5>
+                  <p id="postDate">{{  currPost.post_date }} </p></div>
+                  <h4 id="postName">{{ currPost.post_title }}</h4>
+              <div class="card-body">
+                  <p>{{ currPost.post_content }}</p>
+                  {% if currPost.author.user == current_user.user %}
+                  <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
+                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateModal" data-whatever="@mdo">Update Post</button>
+                  {% endif %}      
+                  {% if current_user.has_liked_post(currPost) %}
+                    <a href="{{ url_for('post_vote', post_id=currPost.id, action_vote='unlike') }}">
+                      <span class="glyphicon glyphicon-thumbs-up"></span>
+                    </a>
+                  {% else %}
+                    <a href="{{ url_for('post_vote', post_id=currPost.id, action_vote='like') }}">
+                      <span class="glyphicon glyphicon-thumbs-down"></span>
+                    </a>
+                  {% endif %}
+                  <p>{{currPost.likes}}</p>
+              </div>
+          </div>
+        {% endfor %}
+           
+    </div>     
 {% endblock %}
 
-
-</head>
-<body>
 
 </body>
 </html>

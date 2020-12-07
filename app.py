@@ -519,7 +519,7 @@ def view_posts():
 @login_required
 def trending():
         all_posts = Posts.query.order_by(Posts.likes)
-        return render_template('Trending.html', all_posts=all_posts)
+        return render_template('Homepage.html', all_posts=all_posts)
 
 
 @app.route('/post_votes/<post_id>/<action_vote>', methods=['GET', 'POST'])
