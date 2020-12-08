@@ -60,7 +60,8 @@ app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'sqlite:///Users',
     'posts':  'sqlite:///posts',
-    'votes': 'sqlite:///votes'
+    'votes': 'sqlite:///votes',
+    'comments': 'sqlite:///comments'
 }
 
 # other imports as necessary
@@ -81,6 +82,14 @@ class Vote(db.Model):
             vote = 'Down'
         return '<Vote - {}, from {} for {}>'.format(vote, self.user.user, self.post.post_title)
 
+class Comments(db.Model):
+    __bind_key__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    #posts = db.relationship('Posts', backref='posts', lazy='dynamic')
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
 class Posts(db.Model):
     _bind_key__ = 'posts'
@@ -91,6 +100,7 @@ class Posts(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
     likes = db.Column(db.Integer, nullable=False)
     post_votes = db.relationship('Vote', backref='post_votes', lazy='dynamic')
+    comments = db.relationship('Comments', backref='comments', lazy='dynamic')
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
@@ -104,6 +114,7 @@ class Friends(db.Model,UserMixin):
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
     posts = db.relationship('Posts', backref='author', lazy='dynamic')
     user_post_vote = db.relationship('Vote', backref='author', lazy='dynamic')
+    comments = db.relationship('Comments', backref='author', lazy='dynamic')
 
     def like_post(self, post):
         if not self.has_liked_post(post):
@@ -205,6 +216,10 @@ class PostForm(FlaskForm):
     title = StringField('Title')
     content = TextAreaField('Body')
     submit = SubmitField('Post!')
+
+class CommentForm(FlaskForm):
+    cmmt_body = TextAreaField('Write your comment here!')
+    submit = SubmitField('Comment!')
 
 class Changepw(FlaskForm):
 
@@ -569,6 +584,20 @@ def delete(id):
     db.session.commit()
     return redirect(url_for('view_posts'))
 
+@app.route('/makeComment/<int:id>/', methods=['GET', 'POST'])
+@login_required
+def comment(id):
+    post = get_post(id)
+    form = CommentForm()
+    if form.validate_on_submit():
+        body = request.form['cmmt_body']
+        comment = Comments(body=body, author=current_user, post_id=id)
+        db.session.add(comment)
+        db.session.commit()
+        return redirect(url_for('profile'))
+    return render_template("MakeComment.html", form=form, post=post, id=id)
+
+
 @app.route('/ViewPosts', methods=['GET', 'POST'])
 def view_posts():
     if request.method == "POST":
@@ -582,6 +611,12 @@ def view_posts():
     else:
         all_posts = Posts.query.order_by(Posts.post_date)
         return render_template('ViewPosts.html', all_posts=all_posts)
+
+@app.route('/Comments', methods=['GET', 'POST'])
+def comments():
+    all_comments = Comments.query.order_by(Comments.timestamp)
+    all_posts = Posts.query.order_by(Posts.post_date)
+    return render_template('Comments.html', all_comments=all_comments, all_posts=all_posts)
 
 @app.route('/Trending', methods=['GET', 'POST'])
 @login_required
