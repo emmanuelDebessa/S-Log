@@ -41,11 +41,11 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
     # gmail authentication
-app.config['MAIL_USERNAME'] = "jonlai0018"
-app.config['MAIL_PASSWORD'] =  "Rh579782"
+app.config['MAIL_USERNAME'] = "uofrsasesecertsanta"
+app.config['MAIL_PASSWORD'] =  "210flask"
 
     # mail accounts
-app.config['MAIL_DEFAULT_SENDER'] = "jonlai0018@gmail.com"
+app.config['MAIL_DEFAULT_SENDER'] = "uofrsasesecertsanta@gmail.com"
 
 
 db = SQLAlchemy(app)

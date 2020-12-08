@@ -53,9 +53,9 @@
                   {% endif %}
                   <p>{{currPost.likes}}</p>
 
-                  <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
-                  <a href="/updatePost/{{currPost.id}}" class="btn btn-primary btn-sm">Update Post</a>
-                  <a href="/makeComment/{{currPost.id}}" class="btn btn-primary btn-sm">Comment</a>
+                  <a href='{{url_for("delete", id = currPost.id)}}' class="btn btn-danger btn-sm">Delete Post</a>
+                  <a href='{{url_for("update", id = currPost.id)}}' class="btn btn-primary btn-sm">Update Post</a>
+                  <a href='{{url_for("comment", id = currPost.id)}}' class="btn btn-primary btn-sm">Comment</a>
               </div>
               <h5 class="card-header">Comments</h5>
               <ul class="list-group list-group-flush">

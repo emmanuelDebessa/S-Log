@@ -48,7 +48,7 @@
                   <p>{{currPost.likes}}</p>
 
 
-                <a href="/makeComment/{{currPost.id}}" class="btn btn-primary btn-sm">Comment</a>
+                <a href='{{url_for("comment", id = currPost.id)}}' class="btn btn-primary btn-sm">Comment</a>
 
               </div>
 
