@@ -11,15 +11,13 @@
 
 {% extends "base.html" %}
 
-
+{% import "bootstrap/wtf.html" as wtf %}
 
 
 {% block page_content %}
 
+<div class = "login">
 
-
-<div class="container center_div" align=middle>
-<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-xs-12">
       <h2>Change Password</h2>
   <form action="{{url_for('edit',user = current_user.user)}}" method="post">
     {{ form.hidden_tag() }}
@@ -27,49 +25,23 @@
 
         <p>
 
-              {{ form.old_pass.label }} <br>
-            <ul>
-            {% for error in form.old_pass.errors %}
-            <li    style="color:red;" >
- {{ error }}
-            </li>
-            {% endfor %}
+              {{ wtf.form_field(form.old_pass) }}
 
-        </ul>
-        {{ form.old_pass(size=30) }}
     </p>
 
 
->    <p>
+   <p>
 
-              {{ form.password.label }} <br>
-            <ul>
-            {% for error in form.password.errors %}
-            <li    style="color:red;" >
- {{ error }}
-            </li>
-            {% endfor %}
-
-        </ul>
-        {{ form.password(size=30) }}
+              {{ wtf.form_field(form.password)  }}
     </p>
 
  <p>
+{{ wtf.form_field(form.confirmation)  }}
 
-              {{ form.confirmation.label }} <br>
-            <ul>
-            {% for error in form.confirmation.errors %}
-            <li    style="color:red;" >
- {{ error }}
-            </li>
-            {% endfor %}
-
-        </ul>
-        {{ form.confirmation(size=30) }}
     </p>
 
   <p>
-        {{ form.submit() }}
+        {{ form.submit( class="btn btn-lg btn-primary") }}
     </p>
 
 
@@ -84,16 +56,16 @@
   {% endif %}
 {% endwith %}
 
-</form>>
+</form>
     <p>
-     <a href='{{url_for("profile",user = user)}}' class="btn btn-lg btn-primary">Home</a>
+     <a href='{{url_for("profile",user = user)}}'>Home</a>
 </p>
 
 
 
 
 </div>
-    </div>
+
 
 {% endblock %}
 

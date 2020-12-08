@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
 {% endblock %}
 {% block page_content %}
-    <!-- create post -->
+       <!-- create post -->
     <form class="postForm" action="" method="POST">
         <label for="title">Title</label>
         <textarea name="post_title" class="form-control" rows="1" ></textarea>
@@ -27,53 +27,35 @@
         <textarea name="post_content" class="form-control" rows="7" ></textarea>
         <input type="submit" value="Post!" class="btn btn-primary">
     </form>
-    <!-- update post -->
-    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Update</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-                <form class="updatedForm" action="" method="POST">
-                    <label for="title">Title</label>
-                    <textarea name="post_title" class="form-control" rows="1" ></textarea>
-                    <br>
-                    <label for="body">Body</label>
-                    <textarea name="post_content" class="form-control" rows="7" ></textarea>
-                    <input type="submit" value="Post!" class="btn btn-primary">
-                </form>
-            </div>
-          </div>
-        </div>
-      </div>
 
-    <div id="postList">
-        <h2>Posts</h2>
+   <div id="postList">
+        <h2>Your Posts</h2>
         {% for currPost in all_posts %}
-        <div id="userPost" class="card bg-light mb-3">
-            <!-- <div class="card-header"></div>
-            <div class="card-header"></div> -->
-            <div class="card-header">
-                <h5 id="postAuthor">{{ currPost.author.user}}</h5>
-                <p id="postDate">{{  currPost.post_date }} </p></div>
-                <h4 id="postName">{{ currPost.post_title }}</h4>
-            <div class="card-body">
-                <p>{{ currPost.post_content }}</p>
-                {% if currPost.author.user == current_user.user %}
-                <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateModal" data-whatever="@mdo">Update Post</button>
-                {% endif %}
-            </div>
-        </div>
+        {% if currPost.author.user == current_user.user %}
+          <div id="userPost" class="card bg-light mb-3">
+              <!-- <div class="card-header"></div>
+              <div class="card-header"></div> -->
+              <div class="card-header">
+                  <h5 id="postAuthor">{{ currPost.author.user}}</h5>
+                  <p id="postDate">{{  currPost.post_date }} </p></div>
+                  <h4 id="postName">{{ currPost.post_title }}</h4>
+              <div class="card-body">
+                  <p>{{ currPost.post_content }}</p>
+
+                  <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
+                     <a href="/updatePost/{{currPost.id}}" class="btn btn-primary btn-sm">Update Post</a>
+
+
+
+              </div>
+          </div>
+        {% endif %}
         {% endfor %}
 
     </div>
 {% endblock %}
 
-
 </body>
 </html>
+
+

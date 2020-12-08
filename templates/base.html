@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block navbar %}
+
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href='{{url_for("profile",user = current_user.user)}}'>Welcome {{current_user.user}}</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,7 +20,7 @@
       <li class="nav-item active">
 
 
-        <a class="nav-link" href="{{url_for('account')}}">Profile <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="{{url_for('account',user = current_user.user)}}">Profile <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link"  href="{{url_for('view_posts')}}">Posts</a>
@@ -43,9 +44,31 @@
         </div>
       </li>
     </ul>
+
   </div>
+          <div class="form-group">
+           <form class="form-inline my-2 my-lg-0" action="{{url_for('search',user = user)}}" method="post">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name='searchbar' id ='searchbar'>
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+              {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+          </div>
+
+
            <a class="btn btn-outline-primary" href="{{url_for('logout')}}">Log out</a>
 </nav>
+
+
+
+
 {% endblock %}
 
 {% block content %}

@@ -19,7 +19,7 @@ from flask_migrate import Migrate
 from _datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from wtforms import ValidationError
+from wtforms import ValidationError,TextAreaField
 from flask_login import LoginManager
 from flask_login import current_user, login_user
 from flask_login import login_required
@@ -59,17 +59,38 @@ mail = Mail(app)
 app.config['SECURITY_PASSWORD_SALT'] = 'emailpass'
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'sqlite:///Users',
-    'posts':  'sqlite:///posts'
+    'posts':  'sqlite:///posts',
+    'votes': 'sqlite:///votes'
 }
 
 # other imports as necessary
-class UserPosts(db.Model):
-    __bind_key__ = 'posts'
+class Vote(db.Model):
+    __bind_key__ = 'votes'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    # user = db.relationship('Friends', backref=db.backref('user_post_votes'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))#issue is this line. Can not find Posts.id
+    # post = db.relationship('Posts', backref=db.backref('post_votes'))
+    # upvote = db.Column(db.Boolean, nullable = False)
+    # timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        if self.upvote == True:
+            vote = 'Up'
+        else:
+            vote = 'Down'
+        return '<Vote - {}, from {} for {}>'.format(vote, self.user.user, self.post.post_title)
+
+
+class Posts(db.Model):
+    _bind_key__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
     post_date = db.Column(db.DateTime, default=datetime.utcnow)
-    post_content = db.Column(db.String(10,000), nullable=False)
+    post_content = db.Column(db.String(10, 000), nullable=False)
     post_title = db.Column(db.String(200), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('friends.id'))
+    likes = db.Column(db.Integer, nullable=False)
+    post_votes = db.relationship('Vote', backref='post_votes', lazy='dynamic')
 
 class Friends(db.Model,UserMixin):
     __bind_key__ = 'users'
@@ -81,7 +102,26 @@ class Friends(db.Model,UserMixin):
     password_hash = db.Column(db.String(200),nullable = False)
     authenticated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
-    posts = db.relationship('UserPosts', backref='author', lazy='dynamic')
+    posts = db.relationship('Posts', backref='author', lazy='dynamic')
+    user_post_vote = db.relationship('Vote', backref='author', lazy='dynamic')
+
+    def like_post(self, post):
+        if not self.has_liked_post(post):
+            like = Vote(user_id=self.id, post_id=post.id)
+            post.likes = post.likes + 1
+            db.session.add(like)
+
+    def unlike_post(self, post):
+        if self.has_liked_post(post):
+            Vote.query.filter_by(
+                user_id=self.id,
+                post_id=post.id).delete()
+            post.likes = post.likes - 1
+
+    def has_liked_post(self, post):
+        return Vote.query.filter(
+            Vote.user_id == self.id,
+            Vote.post_id == post.id).count() > 0
 
    ## confirmed_on = db.Column(db.DateTime, nullable=True)
 
@@ -114,11 +154,11 @@ class InputLabels(FlaskForm):
     user = StringField("Username",[validators.DataRequired("Required")])
 
 
-    password = PasswordField('New Password',[validators.EqualTo('confirmation', message='Passwords must match'),validators.DataRequired("Required")])
+    password = PasswordField('Password',[validators.EqualTo('confirmation', message='Passwords must match'),validators.DataRequired("Required")])
     confirmation = PasswordField('Repeat Password',[validators.DataRequired("Required")])
     submit = SubmitField("Sign up")
 
-    accept_tos = BooleanField("By Clicking here you agree to our TOS", [validators.DataRequired("Must click so we do not get sued")])
+    accept_tos = BooleanField("Agree to TOS", [validators.DataRequired("Must click so we do not get sued")])
     remember_me = BooleanField('Keep me logged in')
 
     def validate_user(self,user):
@@ -161,6 +201,10 @@ class Change_pass(FlaskForm):
     confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
     submit = SubmitField("Submit")
 
+class PostForm(FlaskForm):
+    title = StringField('Title')
+    content = TextAreaField('Body')
+    submit = SubmitField('Post!')
 
 class Changepw(FlaskForm):
 
@@ -173,14 +217,13 @@ class Changepw(FlaskForm):
 
 
 class Delete_account(FlaskForm):
-    password = PasswordField('Current Passwrd', [validators.EqualTo('confirmation', message='Passwords must match'),
+    password = PasswordField('Current Password', [validators.EqualTo('confirmation', message='Passwords must match'),
                                               validators.DataRequired("Required")])
 
     confirmation = PasswordField('Repeat Password', [validators.DataRequired("Required")])
     submit = SubmitField("Delete account forever")
 class UpdateAccountForm(FlaskForm):
-    user = StringField('Username',
-                          [validators.DataRequired()])
+    user = StringField('Username')
 
     picture = FileField('Update Profile Picture', [FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
@@ -313,10 +356,11 @@ def sign():
 
 
 
-@app.route('/Profile/<string:user>',methods=['GET','POST'])
+@app.route('/Profile/',methods=['GET','POST'])
 @login_required
-def profile(user):
-    return render_template("Homepage.html",user = user)
+def profile():
+    all_posts = Posts.query.order_by(Posts.likes.desc())
+    return render_template("Homepage.html",all_posts= all_posts)
 
 @app.route("/logout")
 def logout():
@@ -496,22 +540,26 @@ def send_email(to, subject, template):
     )
     mail.send(msg)
 def get_post(id, check_author=True):
-    post = UserPosts.query.filter_by(id=id).first()
+    post = Posts.query.filter_by(id=id).first()
     return post
 
-# @perm.current_user_loader(lambda: current_user)
 @app.route('/updatePost/<int:id>/', methods=['GET','POST'])
 @login_required
 def update(id):
     updated_post = get_post(id)
-    if request.method == "POST":
-        updated_post.post_content = request.form['post_content']
-        updated_post.post_title = request.form['post_title']
+    form = PostForm()
+    if form.validate_on_submit():
+        updated_post.post_title = form.title.data
+        updated_post.post_content = form.content.data
         db.session.commit()
-        flash('Post Updated!')
+        flash("Your post has been updated!")
         return redirect(url_for('view_posts'))
-    else:
-        return render_template('ViewPosts.html')
+    elif request.method == 'GET':
+        form.title.data = updated_post.post_title
+        form.content.data = updated_post.post_content
+    #return render_template('ViewPosts.html', form=form)
+    return render_template("UpdatePost.html", form=form, id=id)
+
 
 @app.route('/deletePost/<int:id>/', methods=['GET','POST'])
 @login_required
@@ -526,20 +574,55 @@ def view_posts():
     if request.method == "POST":
         usr_post = request.form['post_content']
         usr_title = request.form['post_title']
-        new_post = UserPosts(post_content=usr_post,post_title=usr_title, author=current_user)
+        new_post = Posts(post_content=usr_post,post_title=usr_title, author=current_user, likes=0)
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('view_posts'))
 
     else:
-        all_posts = UserPosts.query.order_by(UserPosts.post_date)
-
+        all_posts = Posts.query.order_by(Posts.post_date)
         return render_template('ViewPosts.html', all_posts=all_posts)
-@app.route('/Account')
+
+@app.route('/Trending', methods=['GET', 'POST'])
 @login_required
-def account():
-    image_file = url_for('static', filename='profile_images/' + current_user.image_file)
-    return render_template('account.html',title = "Account",image = image_file)
+def trending():
+        all_posts = Posts.query.order_by(Posts.likes.desc())
+        return render_template('Trending.html', all_posts=all_posts)
+
+
+@app.route('/post_votes/<post_id>/<action_vote>', methods=['GET', 'POST'])
+@login_required
+def post_vote(post_id, action_vote):
+    post = get_post(post_id)
+    if action_vote == 'like':
+        current_user.like_post(post)
+        db.session.commit()
+    if action_vote == 'unlike':
+        current_user.unlike_post(post)
+        db.session.commit()
+    return redirect(url_for('profile'))
+@app.route('/Account/<string:user>')
+def account(user):
+    email = Friends.query.filter_by(user=user).first()
+    image_file = url_for('static', filename='profile_images/' + email.image_file)
+    return render_template('account.html',title = "Account",image = image_file,user = email.user,email= email.email)
+
+
+@app.route('/Search/', methods=['GET', 'POST'])
+def search():
+    if request.method == 'POST':
+        #email = Friends.query.filter_by(user=user).first()
+        email = Friends.query.filter_by(user=request.form['searchbar']).first()
+        if(email is not None):
+            image_file = url_for('static', filename='profile_images/' + email.image_file)
+            return render_template('account.html', title="Account", image=image_file, user=email.user, email=email.email)
+        else:
+            flash("No username")
+            return redirect(url_for("profile",user = current_user.user))
+
+
+
+
 
 
 
@@ -554,14 +637,21 @@ def Change_Profile():
 
 
 
+        if(form.picture.data is None and (request.form['user'] =='')):
+            flash("Invalid Picture and no change")
 
-        picture_file = save_picture(form.picture.data)
-        current_user.image_file = picture_file
+        else:
+            if form.picture.data is not None:
 
-        current_user.user= request.form['user']
+             picture_file = save_picture(form.picture.data)
+             current_user.image_file = picture_file
 
-        db.session.commit()
-        flash('Your account has been updated!', 'success')
+
+            if(request.form['user'] !=''):
+                current_user.user = request.form['user']
+
+            db.session.commit()
+            flash('Your account has been updated!', 'success')
 
 
         return render_template('Change_profile.html',form = form)
