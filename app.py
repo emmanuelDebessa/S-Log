@@ -356,10 +356,10 @@ def sign():
 
 
 
-@app.route('/Profile/<string:user>',methods=['GET','POST'])
+@app.route('/Profile/',methods=['GET','POST'])
 @login_required
-def profile(user):
-    all_posts = Posts.query.order_by(Posts.likes)
+def profile():
+    all_posts = Posts.query.order_by(Posts.likes.desc())
     return render_template("Homepage.html",all_posts= all_posts)
 
 @app.route("/logout")
@@ -586,7 +586,7 @@ def view_posts():
 @app.route('/Trending', methods=['GET', 'POST'])
 @login_required
 def trending():
-        all_posts = Posts.query.order_by(Posts.likes)
+        all_posts = Posts.query.order_by(Posts.likes.desc())
         return render_template('Trending.html', all_posts=all_posts)
 
 
@@ -600,7 +600,7 @@ def post_vote(post_id, action_vote):
     if action_vote == 'unlike':
         current_user.unlike_post(post)
         db.session.commit()
-    return redirect(url_for('view_posts'))
+    return redirect(url_for('profile'))
 @app.route('/Account/<string:user>')
 def account(user):
     email = Friends.query.filter_by(user=user).first()
@@ -641,15 +641,14 @@ def Change_Profile():
             flash("Invalid Picture and no change")
 
         else:
-            if form.picture.data is None:
-                pass
-            else:
+            if form.picture.data is not None:
 
              picture_file = save_picture(form.picture.data)
              current_user.image_file = picture_file
 
 
-            current_user.user = request.form['user']
+            if(request.form['user'] !=''):
+                current_user.user = request.form['user']
 
             db.session.commit()
             flash('Your account has been updated!', 'success')

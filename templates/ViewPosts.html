@@ -29,7 +29,7 @@
     </form>
 
    <div id="postList">
-        <h2>Posts</h2>
+        <h2>Your Posts</h2>
         {% for currPost in all_posts %}
         {% if currPost.author.user == current_user.user %}
           <div id="userPost" class="card bg-light mb-3">
@@ -45,16 +45,7 @@
                   <a href="/deletePost/{{currPost.id}}" class="btn btn-danger btn-sm">Delete Post</a>
                      <a href="/updatePost/{{currPost.id}}" class="btn btn-primary btn-sm">Update Post</a>
 
-                  {% if current_user.has_liked_post(currPost) %}
-                    <a href="{{ url_for('post_vote', post_id=currPost.id, action_vote='unlike') }}">
-                      <span class="glyphicon glyphicon-thumbs-down"></span>
-                    </a>
-                  {% else %}
-                    <a href="{{ url_for('post_vote', post_id=currPost.id, action_vote='like') }}">
-                      <span class="glyphicon glyphicon-thumbs-up"></span>
-                    </a>
-                  {% endif %}
-                  <p>{{currPost.likes}}</p>
+
 
               </div>
           </div>

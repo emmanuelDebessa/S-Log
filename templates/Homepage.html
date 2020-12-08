@@ -34,7 +34,7 @@
               <div class="card-body">
                   <p>{{ currPost.post_content }}</p>
 
-              
+
 
                   {% if current_user.has_liked_post(currPost) %}
                     <a href="{{ url_for('post_vote', post_id=currPost.id, action_vote='unlike') }}">
