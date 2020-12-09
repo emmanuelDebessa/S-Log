@@ -576,6 +576,20 @@ def update(id):
     return render_template("UpdatePost.html", form=form, id=id)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.route('/deletePost/<int:id>/', methods=['GET','POST'])
 @login_required
 def delete(id):
